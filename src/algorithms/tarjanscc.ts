@@ -173,7 +173,7 @@ export const tarjanSCCAlgo: AlgoDef =
 				steps.push({
 					desc: `dfn[${x}]=low[${x}]=${dfn[x]}，发现第 ${scc_cnt} 个 SCC`,
 					line: 25,
-					vars: { x, scc_cnt },
+					vars: { x, scc_cnt, dfn: [...dfn], low: [...low], stk: stk.slice(1), scc: scc.map(s => [...s]) },
 				});
 
 				while (stk[stk[0]] !== x)
@@ -194,7 +194,7 @@ export const tarjanSCCAlgo: AlgoDef =
 				steps.push({
 					desc: `SCC ${scc_cnt} = [${scc[scc_cnt - 1].sort((a, b) => a - b).join(', ')}]`,
 					line: 32,
-					vars: { scc_cnt, scc: scc[scc_cnt - 1] },
+					vars: { scc_cnt, dfn: [...dfn], low: [...low], stk: stk.slice(1), scc: scc.map(s => [...s]) },
 				});
 			}
 		}

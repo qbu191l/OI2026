@@ -16,6 +16,9 @@ import GSAMVisualizer from './components/GSAMVisualizer';
 import ACVisualizer from './components/ACVisualizer';
 import TrieVisualizer from './components/TrieVisualizer';
 import PruferVisualizer from './components/PruferVisualizer';
+import TarjanSCCVisualizer from './components/TarjanSCCVisualizer';
+import LCAVisualizer from './components/LCAVisualizer';
+import SplayVisualizer from './components/SplayVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -308,6 +311,15 @@ function App()
 						)}
 						{currentStep && algo.id === 'prufer' && (
 							<PruferVisualizer key={`pr-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'tarjanscc' && (
+							<TarjanSCCVisualizer key={`tsc-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && (algo.id === 'lca-binary-lifting' || algo.id === 'lcatarjan') && (
+							<LCAVisualizer key={`lca-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'splay' && (
+							<SplayVisualizer key={`sp-${stepIdx}`} step={currentStep} />
 						)}
 
 						<VariablePanel step={currentStep} />

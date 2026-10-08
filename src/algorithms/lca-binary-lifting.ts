@@ -146,7 +146,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 		steps.push({
 			desc: `DFS 预处理完成`,
 			line: 22,
-			vars: { deep: [...deep] },
+			vars: { deep: [...deep], u: 0, v: 0 },
 		});
 
 		function lca(u: number, v: number): number
@@ -154,7 +154,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 			steps.push({
 				desc: `查询 LCA(${u}, ${v})`,
 				line: 26,
-				vars: { u, v },
+				vars: { u, v, deep: [...deep] },
 			});
 
 			if (deep[u] < deep[v])
@@ -163,7 +163,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 				steps.push({
 					desc: `deep[${u}]<deep[${v}]，交换`,
 					line: 28,
-					vars: { u, v },
+					vars: { u, v, deep: [...deep] },
 				});
 			}
 
@@ -176,7 +176,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 					steps.push({
 						desc: `diff=${diff} (二进制末位=1)，u=dp[${u}][${i}]=${dp[u][i]}`,
 						line: 33,
-						vars: { u, v, diff, i },
+						vars: { u, v, diff, i, deep: [...deep] },
 					});
 					u = dp[u][i];
 				}
@@ -189,7 +189,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 				steps.push({
 					desc: `u==v，LCA=${u}`,
 					line: 37,
-					vars: { u, v },
+					vars: { u, v, result: u, deep: [...deep] },
 				});
 				return u;
 			}
@@ -201,7 +201,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 					steps.push({
 						desc: `i=${i}，dp[${u}][${i}]≠dp[${v}][${i}]，上移`,
 						line: 42,
-						vars: { u, v, i },
+						vars: { u, v, i, deep: [...deep] },
 					});
 					u = dp[u][i];
 					v = dp[v][i];
@@ -212,7 +212,7 @@ export const lcaBinaryLiftingAlgo: AlgoDef =
 			steps.push({
 				desc: `LCA = dp[${u}][0] = ${result}`,
 				line: 46,
-				vars: { u, v, result },
+				vars: { u, v, result, deep: [...deep] },
 			});
 			return result;
 		}
