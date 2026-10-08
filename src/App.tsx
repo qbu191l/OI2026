@@ -10,6 +10,10 @@ import StringVisualizer from './components/StringVisualizer';
 import BITVisualizer from './components/BITVisualizer';
 import SegTreeVisualizer from './components/SegTreeVisualizer';
 import NetworkFlowVisualizer from './components/NetworkFlowVisualizer';
+import TreeChainVisualizer from './components/TreeChainVisualizer';
+import SAMVisualizer from './components/SAMVisualizer';
+import ACVisualizer from './components/ACVisualizer';
+import PruferVisualizer from './components/PruferVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -284,6 +288,18 @@ function App()
 						)}
 						{currentStep && algo.id === 'segtree' && (
 							<SegTreeVisualizer key={`seg-${stepIdx}`} step={currentStep} />
+						)}
+						{currentStep && algo.id === 'treechain' && (
+							<TreeChainVisualizer key={`tc-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'sam' && (
+							<SAMVisualizer key={`sam-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'acautomaton' && (
+							<ACVisualizer key={`ac-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'prufer' && (
+							<PruferVisualizer key={`pr-${stepIdx}`} step={currentStep} inputText={inputText} />
 						)}
 
 						<VariablePanel step={currentStep} />
