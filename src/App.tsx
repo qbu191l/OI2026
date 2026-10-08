@@ -20,6 +20,7 @@ import TarjanSCCVisualizer from './components/TarjanSCCVisualizer';
 import LCAVisualizer from './components/LCAVisualizer';
 import SplayVisualizer from './components/SplayVisualizer';
 import StepLog from './components/StepLog';
+import CommentSection from './components/CommentSection';
 
 function App()
 {
@@ -97,10 +98,20 @@ function App()
 	const handleReset = () => { setIsRunning(false); setIsPaused(false); setStepIdx(-1); setSteps([]); };
 	const handleFF = () => { setIsRunning(true); setIsPaused(false); };
 
+	const mathAlgos = allAlgorithms.filter(a => a.category === 'math');
 	const graphAlgos = allAlgorithms.filter(a => a.category === 'graph');
 	const treeAlgos = allAlgorithms.filter(a => a.category === 'tree');
 	const stringAlgos = allAlgorithms.filter(a => a.category === 'string');
 	const dpAlgos = allAlgorithms.filter(a => a.category === 'dp');
+
+	const categoryConfig =
+	{
+		math: { label: '数学', color: 'emerald', icon: '🔢' },
+		graph: { label: '图论', color: 'indigo', icon: '🔗' },
+		tree: { label: '树论', color: 'purple', icon: '🌳' },
+		string: { label: '字符串', color: 'cyan', icon: '📝' },
+		dp: { label: '动态规划', color: 'rose', icon: '📊' },
+	};
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-slate-950 text-white">
@@ -114,104 +125,55 @@ function App()
 							<h1 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
 								算法可视化学习平台
 							</h1>
-							<p className="text-[10px] text-gray-500">Algorithm Visualizer — 图论 · 树论 · 字符串 · DP</p>
+							<p className="text-[10px] text-gray-500">Algorithm Visualizer — 支持 {allAlgorithms.length} 种经典算法</p>
 						</div>
 					</div>
 				</div>
 			</header>
 
 			<main className="max-w-[1400px] mx-auto px-4 py-4">
-				<div className="mb-4">
-					<div className="flex flex-wrap gap-2 mb-3">
-						{graphAlgos.length > 0 && (
-							<>
-								<span className="text-xs text-gray-500 self-center mr-1">图论:</span>
-								{graphAlgos.map((a) =>
-								{
-									const idx = allAlgorithms.indexOf(a);
-									return (
-										<button
-											key={a.id}
-											onClick={() => setSelectedAlgo(idx)}
-											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-												selectedAlgo === idx
-													? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-											}`}
-										>
-											{a.name}
-										</button>
-									);
-								})}
-							</>
-						)}
-						{treeAlgos.length > 0 && (
-							<>
-								<span className="text-xs text-gray-500 self-center ml-3 mr-1">树论:</span>
-								{treeAlgos.map((a) =>
-								{
-									const idx = allAlgorithms.indexOf(a);
-									return (
-										<button
-											key={a.id}
-											onClick={() => setSelectedAlgo(idx)}
-											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-												selectedAlgo === idx
-													? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-											}`}
-										>
-											{a.name}
-										</button>
-									);
-								})}
-							</>
-						)}
-						{stringAlgos.length > 0 && (
-							<>
-								<span className="text-xs text-gray-500 self-center ml-3 mr-1">字符串:</span>
-								{stringAlgos.map((a) =>
-								{
-									const idx = allAlgorithms.indexOf(a);
-									return (
-										<button
-											key={a.id}
-											onClick={() => setSelectedAlgo(idx)}
-											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-												selectedAlgo === idx
-													? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
-													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-											}`}
-										>
-											{a.name}
-										</button>
-									);
-								})}
-							</>
-						)}
-						{dpAlgos.length > 0 && (
-							<>
-								<span className="text-xs text-gray-500 self-center ml-3 mr-1">动态规划:</span>
-								{dpAlgos.map((a) =>
-								{
-									const idx = allAlgorithms.indexOf(a);
-									return (
-										<button
-											key={a.id}
-											onClick={() => setSelectedAlgo(idx)}
-											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-												selectedAlgo === idx
-													? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20'
-													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-											}`}
-										>
-											{a.name}
-										</button>
-									);
-								})}
-							</>
-						)}
-					</div>
+				{/* 算法选择区域 */}
+				<div className="mb-4 space-y-3">
+					{Object.entries(categoryConfig).map(([category, config]) =>
+					{
+						const algos = allAlgorithms.filter(a => a.category === category);
+						if (algos.length === 0) return null;
+
+						return (
+							<div key={category} className="bg-gray-800/30 rounded-lg border border-gray-700/50 p-3">
+								<div className="flex items-center gap-2 mb-2">
+									<span className="text-sm">{config.icon}</span>
+									<h3 className="text-xs font-semibold text-gray-300">{config.label}</h3>
+									<span className="text-[10px] text-gray-500">({algos.length})</span>
+								</div>
+								<div className="flex flex-wrap gap-2">
+									{algos.map((a) =>
+									{
+										const idx = allAlgorithms.indexOf(a);
+										const isSelected = selectedAlgo === idx;
+										const colorClasses =
+										{
+											math: isSelected ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'hover:bg-emerald-600/20 hover:text-emerald-300',
+											graph: isSelected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-indigo-600/20 hover:text-indigo-300',
+											tree: isSelected ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'hover:bg-purple-600/20 hover:text-purple-300',
+											string: isSelected ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'hover:bg-cyan-600/20 hover:text-cyan-300',
+											dp: isSelected ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20' : 'hover:bg-rose-600/20 hover:text-rose-300',
+										};
+
+										return (
+											<button
+												key={a.id}
+												onClick={() => setSelectedAlgo(idx)}
+												className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-800 text-gray-400 border border-gray-700 ${colorClasses[category as keyof typeof colorClasses]}`}
+											>
+												{a.name}
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						);
+					})}
 
 					<div className="bg-gray-800/40 rounded-lg border border-gray-700/50 px-4 py-2">
 						<p className="text-xs text-gray-400">{algo.desc}</p>
@@ -329,14 +291,15 @@ function App()
 						)}
 					</div>
 				</div>
+				{/* 评论区 */}
+				<CommentSection algoId={algo.id} algoName={algo.name} />
 			</main>
 
 			<footer className="border-t border-gray-800 mt-8 py-3">
 				<div className="max-w-[1400px] mx-auto px-4 text-center text-[10px] text-gray-600">
-					算法可视化学习平台 — 支持 38 种经典算法的动态模拟演示
+					算法可视化学习平台 — 支持 {allAlgorithms.length} 种经典算法的动态模拟演示
 				</div>
-			</footer>
-		</div>
+			</footer>		</div>
 	);
 }
 
