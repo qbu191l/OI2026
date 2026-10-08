@@ -23,8 +23,14 @@ typedef struct SplayTree
 		int id=cid(x);
 		ch[y][id]=ch[x][!id];
 		ch[x][!id]=y;
-		if(z) ch[z][cid(y)]=x;
-		if(ch[y][id]) fa[ch[y][id]]=y;
+		if(z)
+		{
+			ch[z][cid(y)]=x;
+		}
+		if(ch[y][id])
+		{
+			fa[ch[y][id]]=y;
+		}
 		fa[y]=x,fa[x]=z;
 		pushup(y),pushup(x);
 	}
@@ -33,11 +39,30 @@ typedef struct SplayTree
 		int y=fa[x],f=fa[z];
 		while(y!=f)
 		{
-			if(fa[y]!=f) rotate_(cid(x)==cid(y)?y:x);
+			if(fa[y]!=f)
+			{
+				rotate_(cid(x)==cid(y)?y:x);
+			}
 			rotate_(x);
 			y=fa[x];
 		}
 		z=x;
+	}
+	void build(int n)
+	{
+		for(int i=0;i<=n+1;++i)
+		{
+			++idx;
+			ch[idx][0]=rt;
+			if(rt)
+			{
+				fa[rt]=idx;
+			}
+			rt=idx;
+			val[idx]=i;
+			++cnt[idx];
+		}
+		splay(rt,1);
 	}
 	void lzrev(int x)
 	{
@@ -48,21 +73,44 @@ typedef struct SplayTree
 	{
 		if(lz[x])
 		{
-			if(ch[x][0]) lzrev(ch[x][0]);
-			if(ch[x][1]) lzrev(ch[x][1]);
+			if(ch[x][0])
+			{
+				lzrev(ch[x][0]);
+			}
+			if(ch[x][1])
+			{
+				lzrev(ch[x][1]);
+			}
 			lz[x]=0;
 		}
 	}
 	void find_kth(int &rt,int k)
 	{
-		if(k<0) k+=siz[rt]+1;
+		if(k<0)
+		{
+			k+=siz[rt]+1;
+		}
+		if(k<0||k>siz[rt])
+		{
+			return ;
+		}
 		int x=rt;
 		while(1)
 		{
 			pushdown(x);
-			if(siz[ch[x][0]]>=k) x=ch[x][0];
-			else if(siz[ch[x][0]]+cnt[x]>=k) break;
-			else k-=siz[ch[x][0]]+cnt[x],x=ch[x][1];
+			if(siz[ch[x][0]]>=k)
+			{
+				x=ch[x][0];
+			}
+			else if(siz[ch[x][0]]+cnt[x]>=k)
+			{
+				break;
+			}
+			else
+			{
+				k-=siz[ch[x][0]]+cnt[x];
+				x=ch[x][1];
+			}
 		}
 		splay(rt,x);
 	}
@@ -75,16 +123,36 @@ typedef struct SplayTree
 		pushdown(x);
 		splay(rt,x);
 	}
+	void prt(int x)
+	{
+		if(!x)
+		{
+			return ;
+		}
+		pushdown(x);
+		prt(ch[x][0]);
+		printf("%lld ",val[x]);
+		prt(ch[x][1]);
+	}
+	void print()
+	{
+		find_kth(rt,1);
+		find_kth(ch[rt][1],-1);
+		prt(ch[ch[rt][1]][0]);
+		printf("\\n");
+	}
 }SplayTree;
 SplayTree splay;
 signed main()
 {
 	scanf("%lld%lld",&n,&m);
-	for(int i=1;i<=m;++i)
+	splay.build(n);
+	while(m--)
 	{
 		scanf("%lld%lld",&l,&r);
 		splay.rev(l,r);
 	}
+	splay.print();
 	return 0;
 }`;
 
