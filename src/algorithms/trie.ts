@@ -177,6 +177,15 @@ export const trieAlgo: AlgoDef =
 				const s = lines[lineIdx];
 				let now = 0;
 				let found = true;
+				const path: number[] = [0];
+				
+				steps.push({
+					desc: `开始查询 "${s}"，从根节点 0 出发`,
+					line: 48,
+					vars: { s, idx, cnt: [...cnt], currentNode: now, path: [...path] },
+					highlight: [String(now)],
+				});
+				
 				for (let j = 0; j < s.length; ++j)
 				{
 					const c = s[j];
@@ -184,20 +193,47 @@ export const trieAlgo: AlgoDef =
 					if (c >= 'a' && c <= 'z') k = c.charCodeAt(0) - 'a'.charCodeAt(0);
 					else if (c >= 'A' && c <= 'Z') k = c.charCodeAt(0) - 'A'.charCodeAt(0) + 26;
 					else if (c >= '0' && c <= '9') k = c.charCodeAt(0) - '0'.charCodeAt(0) + 52;
-					else { found = false; break; }
+					else 
+					{ 
+						found = false; 
+						steps.push({
+							desc: `字符 '${c}' 无效，查询失败`,
+							line: 54,
+							vars: { s, idx, cnt: [...cnt], currentNode: now, path: [...path], result: 0 },
+						});
+						break; 
+					}
 
 					if (!ch[now][k])
 					{
 						found = false;
+						steps.push({
+							desc: `当前节点 ${now} 没有字符 '${c}' 的子节点，查询失败`,
+							line: 59,
+							vars: { s, idx, cnt: [...cnt], currentNode: now, path: [...path], result: 0, char: c },
+							highlight: [String(now)],
+						});
 						break;
 					}
-					now = ch[now][k];
+					
+					const nextNode = ch[now][k];
+					now = nextNode;
+					path.push(now);
+					
+					steps.push({
+						desc: `匹配字符 '${c}'，从节点 ${path[path.length - 2]} 移动到节点 ${now}`,
+						line: 63,
+						vars: { s, idx, cnt: [...cnt], currentNode: now, path: [...path], char: c, charIndex: j },
+						highlight: [String(now)],
+					});
 				}
+				
 				const result = found ? cnt[now] : 0;
 				steps.push({
-					desc: `查询 "${s}"：${result} 个字符串以此为前缀`,
-					line: 43,
-					vars: { s, result },
+					desc: `查询完成：${result} 个字符串以 "${s}" 为前缀`,
+					line: 65,
+					vars: { s, result, idx, cnt: [...cnt], currentNode: now, path: [...path] },
+					highlight: found ? [String(now)] : [],
 				});
 			}
 		}
