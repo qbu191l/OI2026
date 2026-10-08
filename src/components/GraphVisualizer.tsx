@@ -150,7 +150,7 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 						let fillColor = '#9ca3af';
 						
 						// 判断是否为有向图算法
-						const isDirected = ['dijkstra', 'spfa', 'floyd', 'tarjanscc', 'ek', 'dinic', 'hlpp', 'mcmf'].includes(algoId);
+						const isDirected = ['dijkstra', 'spfa', 'floyd', 'tarjanscc', 'ek', 'dinic', 'hlpp', 'mcmf', 'edmonds'].includes(algoId);
 						let markerId = isDirected ? 'url(#arrow)' : undefined;
 
 						if (hl)
