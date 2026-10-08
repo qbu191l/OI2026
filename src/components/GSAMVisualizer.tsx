@@ -1,28 +1,31 @@
 import React, { useMemo } from 'react';
 import { SimStep } from '../types';
 
-interface SAMVisualizerProps
+interface GSAMVisualizerProps
 {
 	step: SimStep | null;
 	inputText: string;
 }
 
-const SAMVisualizer: React.FC<SAMVisualizerProps> = ({ step, inputText }) =>
+const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 {
 	if (!step) return null;
 
-	const s = inputText.trim();
-	if (s.length === 0) return null;
+	const lines = inputText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+	if (lines.length < 1) return null;
+
+	const n = Number(lines[0]);
+	const strings = lines.slice(1, n + 1);
 
 	const vars = step.vars || {};
 	const highlight = new Set(step.highlight || []);
 
-	// Get SAM state from step
-	const tot = vars.tot as number | undefined;
+	// Get GSAM state from step
+	const tots = vars.tots as number | undefined;
 	const len = vars.len as number[] | undefined;
 	const fa = vars.fa as number[] | undefined;
 
-	if (!tot || !len || !fa) return null;
+	if (!tots || !len || !fa) return null;
 
 	// Use useMemo to stabilize positions across renders
 	const positions = useMemo(() =>
@@ -31,7 +34,7 @@ const SAMVisualizer: React.FC<SAMVisualizerProps> = ({ step, inputText }) =>
 		
 		// Build simple layout - arrange nodes in levels by length
 		const levels: number[][] = [];
-		for (let i = 1; i <= tot; ++i)
+		for (let i = 1; i <= tots; ++i)
 		{
 			const l = len[i];
 			while (levels.length <= l) levels.push([]);
@@ -54,34 +57,39 @@ const SAMVisualizer: React.FC<SAMVisualizerProps> = ({ step, inputText }) =>
 		});
 
 		return pos;
-	}, [tot, len]);
+	}, [tots, len]);
 
 	const svgHeight = useMemo(() =>
 	{
-		const maxLen = Math.max(...len.slice(1, tot + 1));
+		const maxLen = Math.max(...len.slice(1, tots + 1));
 		return Math.max(300, (maxLen + 1) * 70 + 80);
-	}, [len, tot]);
+	}, [len, tots]);
 
 	const nodeRadius = 20;
 
 	return (
 		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-				<span>🔗</span> 后缀自动机 (SAM)
+				<span>🔗</span> 广义后缀自动机 (GSAM)
 			</h3>
+			<div className="mb-2 text-xs text-gray-400">
+				输入字符串: {strings.map((s, i) => (
+					<span key={i} className="text-cyan-400 font-mono">"{s}"{i < strings.length - 1 ? ', ' : ''}</span>
+				))}
+			</div>
 			<div className="flex justify-center overflow-x-auto">
 				<svg viewBox={`0 0 400 ${svgHeight}`} className="w-full max-w-[500px] h-auto">
 					<defs>
-						<marker id="sam-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+						<marker id="gsam-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
 							<polygon points="0 0, 8 3, 0 6" fill="#6b7280" />
 						</marker>
-						<marker id="sam-arrow-hl" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+						<marker id="gsam-arrow-hl" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
 							<polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
 						</marker>
 					</defs>
 
 					{/* Suffix links (fa) */}
-					{Array.from({ length: tot + 1 }, (_, i) => i).slice(2).map(i =>
+					{Array.from({ length: tots + 1 }, (_, i) => i).slice(2).map(i =>
 					{
 						const fromPos = positions.get(i);
 						const toPos = positions.get(fa[i]);
@@ -97,20 +105,20 @@ const SAMVisualizer: React.FC<SAMVisualizerProps> = ({ step, inputText }) =>
 								stroke={isHL ? '#f59e0b' : '#6b7280'}
 								strokeWidth={isHL ? 2 : 1.5}
 								strokeDasharray="4,4"
-								markerEnd={isHL ? 'url(#sam-arrow-hl)' : 'url(#sam-arrow)'}
+								markerEnd={isHL ? 'url(#gsam-arrow-hl)' : 'url(#gsam-arrow)'}
 							/>
 						);
 					})}
 
 					{/* Nodes */}
-					{Array.from({ length: tot + 1 }, (_, i) => i).slice(1).map(i =>
+					{Array.from({ length: tots + 1 }, (_, i) => i).slice(1).map(i =>
 					{
 						const pos = positions.get(i);
 						if (!pos) return null;
 
 						const isHL = highlight.has(String(i));
-						const fill = isHL ? '#f59e0b' : '#6366f1';
-						const stroke = isHL ? '#d97706' : '#4f46e5';
+						const fill = isHL ? '#f59e0b' : '#8b5cf6';
+						const stroke = isHL ? '#d97706' : '#7c3aed';
 
 						return (
 							<g key={`node-${i}`}>
@@ -156,4 +164,4 @@ const SAMVisualizer: React.FC<SAMVisualizerProps> = ({ step, inputText }) =>
 	);
 };
 
-export default SAMVisualizer;
+export default GSAMVisualizer;

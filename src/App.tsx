@@ -12,6 +12,7 @@ import SegTreeVisualizer from './components/SegTreeVisualizer';
 import NetworkFlowVisualizer from './components/NetworkFlowVisualizer';
 import TreeChainVisualizer from './components/TreeChainVisualizer';
 import SAMVisualizer from './components/SAMVisualizer';
+import GSAMVisualizer from './components/GSAMVisualizer';
 import ACVisualizer from './components/ACVisualizer';
 import PruferVisualizer from './components/PruferVisualizer';
 import StepLog from './components/StepLog';
@@ -294,6 +295,9 @@ function App()
 						)}
 						{currentStep && algo.id === 'sam' && (
 							<SAMVisualizer key={`sam-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'gsam' && (
+							<GSAMVisualizer key={`gsam-${stepIdx}`} step={currentStep} inputText={inputText} />
 						)}
 						{currentStep && algo.id === 'acautomaton' && (
 							<ACVisualizer key={`ac-${stepIdx}`} step={currentStep} inputText={inputText} />
