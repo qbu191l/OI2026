@@ -297,7 +297,7 @@ function App()
 
 			<footer className="border-t border-gray-800 mt-8 py-3">
 				<div className="max-w-[1400px] mx-auto px-4 text-center text-[10px] text-gray-600">
-					算法可视化学习平台 — 平衡树专题
+					算法可视化学习平台 — 支持 38 种经典算法的动态模拟演示
 				</div>
 			</footer>
 		</div>

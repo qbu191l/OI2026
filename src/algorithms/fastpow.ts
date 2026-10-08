@@ -46,7 +46,7 @@ export const fastPowAlgo: AlgoDef =
 
 		steps.push({
 			desc: `输入：a=${a}, b=${b}, p=${p}`,
-			line: 19,
+			line: 15,
 			vars: { a, b, p },
 		});
 
