@@ -9,6 +9,7 @@ import GraphVisualizer from './components/GraphVisualizer';
 import StringVisualizer from './components/StringVisualizer';
 import BITVisualizer from './components/BITVisualizer';
 import SegTreeVisualizer from './components/SegTreeVisualizer';
+import NetworkFlowVisualizer from './components/NetworkFlowVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -269,7 +270,10 @@ function App()
 						{currentStep && (algo.id === 'treap' || algo.id === 'fhq-treap') && (
 							<TreapVisualizer key={`tp-${stepIdx}`} step={currentStep} algoId={algo.id} />
 						)}
-						{currentStep && algo.category === 'graph' && (
+						{currentStep && ['ek', 'dinic', 'hlpp', 'mcmf'].includes(algo.id) && (
+							<NetworkFlowVisualizer key={`nf-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
+						)}
+						{currentStep && algo.category === 'graph' && !['ek', 'dinic', 'hlpp', 'mcmf'].includes(algo.id) && (
 							<GraphVisualizer key={`gv-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
 						)}
 						{currentStep && algo.category === 'string' && (
