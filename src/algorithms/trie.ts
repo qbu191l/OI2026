@@ -116,10 +116,14 @@ export const trieAlgo: AlgoDef =
 		const t = Number(lines[0]);
 		let lineIdx = 1;
 
+		const ch: number[][] = Array.from({ length: 1000 }, () => new Array(62).fill(0));
+		const cnt: number[] = new Array(1000).fill(0);
+		let idx = 0;
+
 		steps.push({
 			desc: `t=${t} 组测试数据`,
 			line: 50,
-			vars: { t },
+			vars: { t, idx, cnt: [...cnt] },
 		});
 
 		for (let testCase = 0; testCase < t && lineIdx < lines.length; ++testCase)
@@ -132,12 +136,8 @@ export const trieAlgo: AlgoDef =
 			steps.push({
 				desc: `测试 ${testCase + 1}：n=${n} 个字符串，q=${q} 个查询`,
 				line: 52,
-				vars: { n, q },
+				vars: { n, q, idx, cnt: [...cnt] },
 			});
-
-			const ch: number[][] = Array.from({ length: 1000 }, () => new Array(62).fill(0));
-			const cnt: number[] = new Array(1000).fill(0);
-			let idx = 0;
 
 			for (let i = 1; i <= n && lineIdx < lines.length; ++i, ++lineIdx)
 			{

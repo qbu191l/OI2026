@@ -106,17 +106,18 @@ export const samAlgo: AlgoDef =
 		if (s.length === 0) return steps;
 
 		const n = s.length;
-		steps.push({
-			desc: `字符串 s="${s}"，长度 n=${n}`,
-			line: 62,
-			vars: { s, n },
-		});
-
+		
 		const fa: number[] = new Array(2 * n + 2).fill(0);
 		const len: number[] = new Array(2 * n + 2).fill(0);
 		const cnt: number[] = new Array(2 * n + 2).fill(0);
 		const ch: Map<number, number>[] = Array.from({ length: 2 * n + 2 }, () => new Map());
 		let tot = 1, np = 1;
+
+		steps.push({
+			desc: `字符串 s="${s}"，长度 n=${n}，初始化 SAM`,
+			line: 62,
+			vars: { s, n, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+		});
 
 		for (let i = 0; i < n; ++i)
 		{
@@ -145,7 +146,7 @@ export const samAlgo: AlgoDef =
 				steps.push({
 					desc: `fa[${np}]=1（无匹配前缀）`,
 					line: 38,
-					vars: { np, fa: fa.slice(0, tot + 1) },
+					vars: { np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
 				});
 			}
 			else
@@ -157,7 +158,7 @@ export const samAlgo: AlgoDef =
 					steps.push({
 						desc: `fa[${np}]=${q}（len[q]=len[${cur}]+1）`,
 						line: 43,
-						vars: { np, q, fa: fa.slice(0, tot + 1) },
+						vars: { np, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
 					});
 				}
 				else

@@ -14,6 +14,7 @@ import TreeChainVisualizer from './components/TreeChainVisualizer';
 import SAMVisualizer from './components/SAMVisualizer';
 import GSAMVisualizer from './components/GSAMVisualizer';
 import ACVisualizer from './components/ACVisualizer';
+import TrieVisualizer from './components/TrieVisualizer';
 import PruferVisualizer from './components/PruferVisualizer';
 import StepLog from './components/StepLog';
 
@@ -301,6 +302,9 @@ function App()
 						)}
 						{currentStep && algo.id === 'acautomaton' && (
 							<ACVisualizer key={`ac-${stepIdx}`} step={currentStep} inputText={inputText} />
+						)}
+						{currentStep && algo.id === 'trie' && (
+							<TrieVisualizer key={`trie-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
 						)}
 						{currentStep && algo.id === 'prufer' && (
 							<PruferVisualizer key={`pr-${stepIdx}`} step={currentStep} inputText={inputText} />

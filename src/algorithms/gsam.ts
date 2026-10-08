@@ -132,25 +132,22 @@ export const gsamAlgo: AlgoDef =
 		const n = Number(lines[0]);
 		const strings: string[] = [];
 
-		steps.push({
-			desc: `n=${n} 个字符串`,
-			line: 68,
-			vars: { n },
-		});
-
 		for (let i = 1; i <= n && i < lines.length; ++i)
 		{
 			strings.push(lines[i]);
 		}
 
-		steps.push({
-			desc: `读入字符串：${strings.map(s => `"${s}"`).join(', ')}`,
-			line: 70,
-			vars: { strings },
-		});
-
 		const trie: Map<number, number>[] = [new Map()];
 		let trie_tot = 0;
+		const tots = 1;
+		const len: number[] = [0, 0];
+		const fa: number[] = [0, 0];
+
+		steps.push({
+			desc: `n=${n} 个字符串：${strings.map(s => `"${s}"`).join(', ')}`,
+			line: 68,
+			vars: { n, strings, tots, len: [...len], fa: [...fa] },
+		});
 
 		for (const str of strings)
 		{
@@ -171,13 +168,10 @@ export const gsamAlgo: AlgoDef =
 		steps.push({
 			desc: `Trie 构建完成，共 ${trie_tot} 个节点`,
 			line: 75,
-			vars: { trie_tot, strings },
+			vars: { trie_tot, strings, tots, len: [...len], fa: [...fa] },
 		});
 
-		const tots = 1;
 		const chs: number[][] = Array.from({ length: 2 * trie_tot + 2 }, () => new Array(26).fill(0));
-		const fa: number[] = new Array(2 * trie_tot + 2).fill(0);
-		const len: number[] = new Array(2 * trie_tot + 2).fill(0);
 		let gsam_tot = 1;
 
 		function gsam_extend(p: number, c: number): number
@@ -256,7 +250,7 @@ export const gsamAlgo: AlgoDef =
 		steps.push({
 			desc: `不同子串数 = ${ans}`,
 			line: 85,
-			vars: { ans },
+			vars: { ans, tots: gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
 		});
 
 		return steps;

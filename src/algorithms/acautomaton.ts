@@ -111,15 +111,15 @@ export const acAutomatonAlgo: AlgoDef =
 		const n = Number(lines[0]);
 		const patterns: string[] = [];
 
-		steps.push({
-			desc: `n=${n} 个模式串`,
-			line: 45,
-			vars: { n },
-		});
-
 		const trie: number[][] = Array.from({ length: 1000 }, () => new Array(28).fill(0));
 		const cnt: number[] = new Array(1000).fill(0);
 		let idx = 0;
+
+		steps.push({
+			desc: `n=${n} 个模式串`,
+			line: 45,
+			vars: { n, idx, cnt: [...cnt] },
+		});
 
 		for (let i = 1; i <= n && i < lines.length; ++i)
 		{
