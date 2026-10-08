@@ -1,0 +1,225 @@
+import React from 'react';
+import { SimStep } from '../types';
+
+interface TreapVisualizerProps
+{
+	step: SimStep | null;
+	algoId: string;
+}
+
+interface TreeNode
+{
+	id: number;
+	val: number;
+	ls: number;
+	rs: number;
+	rev?: boolean;
+	siz?: number;
+}
+
+interface TreeData
+{
+	root: number;
+	nodes: TreeNode[];
+	now: number;
+}
+
+const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
+{
+	if (!step) return null;
+
+	const treeData = step.vars.tree as TreeData | undefined;
+	if (!treeData || !treeData.nodes || treeData.nodes.length === 0) return null;
+
+	const { root, nodes } = treeData;
+
+	// 计算树的高度和布局
+	function getDepth(nodeId: number): number
+	{
+		if (!nodeId) return 0;
+		const node = nodes.find(n => n.id === nodeId);
+		if (!node) return 0;
+		return 1 + Math.max(getDepth(node.ls), getDepth(node.rs));
+	}
+
+	const maxDepth = getDepth(root);
+	const svgWidth = Math.max(600, Math.pow(2, maxDepth) * 60);
+	const svgHeight = maxDepth * 80 + 50;
+
+	// 递归计算节点位置
+	function getNodePositions(
+		nodeId: number,
+		x: number,
+		y: number,
+		width: number,
+		positions: Map<number, { x: number; y: number }>
+	)
+	{
+		if (!nodeId) return;
+		const node = nodes.find(n => n.id === nodeId);
+		if (!node) return;
+
+		positions.set(nodeId, { x, y });
+
+		const childWidth = width / 2;
+		if (node.ls)
+		{
+			getNodePositions(node.ls, x - childWidth / 2, y + 70, childWidth, positions);
+		}
+		if (node.rs)
+		{
+			getNodePositions(node.rs, x + childWidth / 2, y + 70, childWidth, positions);
+		}
+	}
+
+	const positions = new Map<number, { x: number; y: number }>();
+	getNodePositions(root, svgWidth / 2, 40, svgWidth * 0.8, positions);
+
+	// 渲染节点
+	function renderNode(nodeId: number)
+	{
+		if (!nodeId) return null;
+		const node = nodes.find(n => n.id === nodeId);
+		if (!node) return null;
+		const pos = positions.get(nodeId);
+		if (!pos) return null;
+
+		const isRev = node.rev;
+		const fillColor = isRev ? '#f59e0b' : '#6366f1';
+		const strokeColor = isRev ? '#d97706' : '#4f46e5';
+
+		return (
+			<g key={`node-${nodeId}`}>
+				{/* 节点圆形 */}
+				<circle
+					cx={pos.x}
+					cy={pos.y}
+					r={25}
+					fill={fillColor}
+					stroke={strokeColor}
+					strokeWidth={2}
+				/>
+				{/* 节点值 */}
+				<text
+					x={pos.x}
+					y={pos.y + 5}
+					textAnchor="middle"
+					fontSize="14"
+					fontWeight="bold"
+					fill="white"
+				>
+					{node.val}
+				</text>
+				{/* 翻转标记 */}
+				{isRev && (
+					<text
+						x={pos.x + 20}
+						y={pos.y - 20}
+						textAnchor="middle"
+						fontSize="10"
+						fill="#fbbf24"
+						fontWeight="bold"
+					>
+						↻
+					</text>
+				)}
+				{/* 子树大小 */}
+				{node.siz !== undefined && (
+					<text
+						x={pos.x}
+						y={pos.y + 40}
+						textAnchor="middle"
+						fontSize="10"
+						fill="#9ca3af"
+					>
+						siz={node.siz}
+					</text>
+				)}
+			</g>
+		);
+	}
+
+	// 渲染边
+	function renderEdges(nodeId: number): JSX.Element[]
+	{
+		if (!nodeId) return [];
+		const node = nodes.find(n => n.id === nodeId);
+		if (!node) return [];
+		const parentPos = positions.get(nodeId);
+		if (!parentPos) return [];
+
+		const edges: JSX.Element[] = [];
+
+		if (node.ls)
+		{
+			const childPos = positions.get(node.ls);
+			if (childPos)
+			{
+				edges.push(
+					<line
+						key={`edge-${nodeId}-ls`}
+						x1={parentPos.x}
+						y1={parentPos.y + 25}
+						x2={childPos.x}
+						y2={childPos.y - 25}
+						stroke="#6b7280"
+						strokeWidth={2}
+					/>
+				);
+				edges.push(...renderEdges(node.ls));
+			}
+		}
+
+		if (node.rs)
+		{
+			const childPos = positions.get(node.rs);
+			if (childPos)
+			{
+				edges.push(
+					<line
+						key={`edge-${nodeId}-rs`}
+						x1={parentPos.x}
+						y1={parentPos.y + 25}
+						x2={childPos.x}
+						y2={childPos.y - 25}
+						stroke="#6b7280"
+						strokeWidth={2}
+					/>
+				);
+				edges.push(...renderEdges(node.rs));
+			}
+		}
+
+		return edges;
+	}
+
+	return (
+		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+				<span>🌳</span> {algoId === 'treap' ? 'Treap 平衡树' : 'FHQ Treap 文艺平衡树'}
+			</h3>
+			<div className="overflow-x-auto">
+				<svg width={svgWidth} height={svgHeight} className="mx-auto">
+					{/* 渲染边 */}
+					{renderEdges(root)}
+					{/* 渲染节点 */}
+					{nodes.map(node => renderNode(node.id))}
+				</svg>
+			</div>
+			<div className="mt-3 text-xs text-gray-400">
+				<div className="flex items-center gap-4">
+					<div className="flex items-center gap-2">
+						<div className="w-4 h-4 rounded-full bg-indigo-500"></div>
+						<span>普通节点</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<div className="w-4 h-4 rounded-full bg-amber-500"></div>
+						<span>带翻转标记</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default TreapVisualizer;
