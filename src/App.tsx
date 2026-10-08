@@ -5,6 +5,7 @@ import CodeDisplay from './components/CodeDisplay';
 import VariablePanel from './components/VariablePanel';
 import ControlPanel from './components/ControlPanel';
 import TreapVisualizer from './components/TreapVisualizer';
+import GraphVisualizer from './components/GraphVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -191,6 +192,9 @@ function App()
 
 						{currentStep && (algo.id === 'treap' || algo.id === 'fhq-treap') && (
 							<TreapVisualizer key={`tp-${stepIdx}`} step={currentStep} algoId={algo.id} />
+						)}
+						{currentStep && algo.category === 'graph' && (
+							<GraphVisualizer key={`gv-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
 						)}
 
 						<VariablePanel step={currentStep} />
