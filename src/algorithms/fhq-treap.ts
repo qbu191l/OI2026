@@ -353,17 +353,38 @@ export const fhqTreapAlgo: AlgoDef =
 			return { root: roots ? roots[0] : root, nodes, now, allRoots: roots || [root] };
 		}
 
-		// 建树
+		// 建树 - 逐步插入
+		steps.push({
+			desc: `开始建树，初始为空树`,
+			line: 92,
+			vars: { n, m, tree: getTreeData([0]) },
+		});
+
 		for (let i = 1; i <= n; ++i)
 		{
-			root = merge(root, extend(i));
+			const newNode = extend(i);
+			
+			steps.push({
+				desc: `创建节点 ${newNode}，值为 ${i}`,
+				line: 94,
+				vars: { i, newNode, tree: getTreeData(currentRoots) },
+				highlight: [String(newNode)],
+			});
+
+			root = merge(root, newNode);
+			currentRoots = [root];
+			
+			steps.push({
+				desc: `合并节点 ${newNode} 到树中`,
+				line: 96,
+				vars: { i, tree: getTreeData(currentRoots) },
+				highlight: [String(root)],
+			});
 		}
-		
-		currentRoots = [root];
 
 		steps.push({
 			desc: `建树完成，初始序列 [1, 2, ..., ${n}]`,
-			line: 101,
+			line: 98,
 			vars: { n, m, tree: getTreeData(currentRoots) },
 		});
 

@@ -316,42 +316,344 @@ export const treapAlgo: AlgoDef =
 			}
 			else if (op === 2)
 			{
+				// 删除操作
+				const rootRef = { value: root };
+				
+				function _remove(p: { value: number }, v: number, depth: number = 0)
+				{
+					const indent = '  '.repeat(depth);
+					
+					if (!p.value)
+					{
+						steps.push({
+							desc: `${indent}节点为空，返回`,
+							line: 65,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return;
+					}
+					
+					steps.push({
+						desc: `${indent}访问节点 ${p.value}（值=${val[p.value]}）`,
+						line: 66,
+						vars: { op, x, tree: getTreeData() },
+						highlight: [String(p.value)],
+					});
+					
+					if (v === val[p.value])
+					{
+						steps.push({
+							desc: `${indent}找到要删除的节点 ${p.value}`,
+							line: 66,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
+						
+						if (!ls[p.value] && !rs[p.value])
+						{
+							steps.push({
+								desc: `${indent}叶子节点，直接删除`,
+								line: 70,
+								vars: { op, x, tree: getTreeData() },
+							});
+							p.value = 0;
+							return;
+						}
+						
+						if (!ls[p.value])
+						{
+							steps.push({
+								desc: `${indent}只有右子树，用右子树替代`,
+								line: 75,
+								vars: { op, x, tree: getTreeData() },
+							});
+							p.value = rs[p.value];
+							return;
+						}
+						
+						if (!rs[p.value])
+						{
+							steps.push({
+								desc: `${indent}只有左子树，用左子树替代`,
+								line: 80,
+								vars: { op, x, tree: getTreeData() },
+							});
+							p.value = ls[p.value];
+							return;
+						}
+						
+						if (pri[ls[p.value]] < pri[rs[p.value]])
+						{
+							steps.push({
+								desc: `${indent}左儿子优先级更小，右旋`,
+								line: 85,
+								vars: { op, x, tree: getTreeData() },
+								highlight: [String(p.value), String(ls[p.value])],
+							});
+							zag(p);
+							_remove({ value: rs[p.value] }, v, depth + 1);
+						}
+						else
+						{
+							steps.push({
+								desc: `${indent}右儿子优先级更小，左旋`,
+								line: 90,
+								vars: { op, x, tree: getTreeData() },
+								highlight: [String(p.value), String(rs[p.value])],
+							});
+							zig(p);
+							_remove({ value: ls[p.value] }, v, depth + 1);
+						}
+					}
+					else if (v < val[p.value])
+					{
+						steps.push({
+							desc: `${indent}${v} < ${val[p.value]}，往左子树递归`,
+							line: 94,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
+						_remove({ value: ls[p.value] }, v, depth + 1);
+					}
+					else
+					{
+						steps.push({
+							desc: `${indent}${v} > ${val[p.value]}，往右子树递归`,
+							line: 95,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
+						_remove({ value: rs[p.value] }, v, depth + 1);
+					}
+					
+					if (p.value) pushup(p.value);
+				}
+				
+				_remove(rootRef, x);
+				root = rootRef.value;
+				
 				steps.push({
-					desc: `删除 ${x}`,
-					line: 58,
+					desc: `删除 ${x} 完成`,
+					line: 96,
 					vars: { op, x, tree: getTreeData() },
 				});
 			}
 			else if (op === 3)
 			{
+				// 查询排名
+				function query_rank(p: number, v: number, depth: number = 0): number
+				{
+					const indent = '  '.repeat(depth);
+					
+					if (!p)
+					{
+						steps.push({
+							desc: `${indent}节点为空，返回排名 1`,
+							line: 100,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return 1;
+					}
+					
+					steps.push({
+						desc: `${indent}访问节点 ${p}（值=${val[p]}，左子树大小=${siz[ls[p]]}）`,
+						line: 101,
+						vars: { op, x, tree: getTreeData() },
+						highlight: [String(p)],
+					});
+					
+					if (v <= val[p])
+					{
+						steps.push({
+							desc: `${indent}${v} <= ${val[p]}，往左子树查询`,
+							line: 101,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return query_rank(ls[p], v, depth + 1);
+					}
+					else
+					{
+						const rank = siz[ls[p]] + 1 + query_rank(rs[p], v, depth + 1);
+						steps.push({
+							desc: `${indent}${v} > ${val[p]}，排名 = ${siz[ls[p]]} + 1 + 右子树排名 = ${rank}`,
+							line: 102,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return rank;
+					}
+				}
+				
+				const rank = query_rank(root, x);
 				steps.push({
-					desc: `查询 ${x} 的排名`,
-					line: 78,
-					vars: { op, x, tree: getTreeData() },
+					desc: `${x} 的排名为 ${rank}`,
+					line: 131,
+					vars: { op, x, rank, tree: getTreeData() },
 				});
 			}
 			else if (op === 4)
 			{
+				// 查询第k大
+				function query_kth(p: number, k: number, depth: number = 0): number
+				{
+					const indent = '  '.repeat(depth);
+					
+					if (!p)
+					{
+						steps.push({
+							desc: `${indent}节点为空，返回 -INF`,
+							line: 106,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return -Infinity;
+					}
+					
+					steps.push({
+						desc: `${indent}访问节点 ${p}（值=${val[p]}，左子树大小=${siz[ls[p]]}，k=${k}）`,
+						line: 107,
+						vars: { op, x, tree: getTreeData() },
+						highlight: [String(p)],
+					});
+					
+					if (k <= siz[ls[p]])
+					{
+						steps.push({
+							desc: `${indent}k=${k} <= 左子树大小 ${siz[ls[p]]}，往左子树查询`,
+							line: 107,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return query_kth(ls[p], k, depth + 1);
+					}
+					else if (k === siz[ls[p]] + 1)
+					{
+						steps.push({
+							desc: `${indent}k=${k} == 左子树大小 + 1，找到目标节点 ${p}（值=${val[p]}）`,
+							line: 108,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p)],
+						});
+						return val[p];
+					}
+					else
+					{
+						const newK = k - siz[ls[p]] - 1;
+						steps.push({
+							desc: `${indent}k=${k} > 左子树大小 + 1，往右子树查询，新 k=${newK}`,
+							line: 109,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return query_kth(rs[p], newK, depth + 1);
+					}
+				}
+				
+				const result = query_kth(root, x);
 				steps.push({
-					desc: `查询排名第 ${x} 的数`,
-					line: 83,
-					vars: { op, x, tree: getTreeData() },
+					desc: `排名第 ${x} 的数为 ${result}`,
+					line: 132,
+					vars: { op, x, result, tree: getTreeData() },
 				});
 			}
 			else if (op === 5)
 			{
+				// 查询前驱
+				function query_pre(p: number, v: number, depth: number = 0): number
+				{
+					const indent = '  '.repeat(depth);
+					
+					if (!p)
+					{
+						steps.push({
+							desc: `${indent}节点为空，返回 -INF`,
+							line: 113,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return -Infinity;
+					}
+					
+					steps.push({
+						desc: `${indent}访问节点 ${p}（值=${val[p]}）`,
+						line: 114,
+						vars: { op, x, tree: getTreeData() },
+						highlight: [String(p)],
+					});
+					
+					if (val[p] >= v)
+					{
+						steps.push({
+							desc: `${indent}${val[p]} >= ${v}，往左子树查询`,
+							line: 114,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return query_pre(ls[p], v, depth + 1);
+					}
+					else
+					{
+						const result = Math.max(val[p], query_pre(rs[p], v, depth + 1));
+						steps.push({
+							desc: `${indent}${val[p]} < ${v}，前驱 = max(${val[p]}, 右子树前驱) = ${result}`,
+							line: 115,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return result;
+					}
+				}
+				
+				const result = query_pre(root, x);
 				steps.push({
-					desc: `查询 ${x} 的前驱`,
-					line: 88,
-					vars: { op, x, tree: getTreeData() },
+					desc: `${x} 的前驱为 ${result}`,
+					line: 133,
+					vars: { op, x, result, tree: getTreeData() },
 				});
 			}
 			else if (op === 6)
 			{
+				// 查询后继
+				function query_nxt(p: number, v: number, depth: number = 0): number
+				{
+					const indent = '  '.repeat(depth);
+					
+					if (!p)
+					{
+						steps.push({
+							desc: `${indent}节点为空，返回 INF`,
+							line: 119,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return Infinity;
+					}
+					
+					steps.push({
+						desc: `${indent}访问节点 ${p}（值=${val[p]}）`,
+						line: 120,
+						vars: { op, x, tree: getTreeData() },
+						highlight: [String(p)],
+					});
+					
+					if (val[p] <= v)
+					{
+						steps.push({
+							desc: `${indent}${val[p]} <= ${v}，往右子树查询`,
+							line: 120,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return query_nxt(rs[p], v, depth + 1);
+					}
+					else
+					{
+						const result = Math.min(val[p], query_nxt(ls[p], v, depth + 1));
+						steps.push({
+							desc: `${indent}${val[p]} > ${v}，后继 = min(${val[p]}, 左子树后继) = ${result}`,
+							line: 121,
+							vars: { op, x, tree: getTreeData() },
+						});
+						return result;
+					}
+				}
+				
+				const result = query_nxt(root, x);
 				steps.push({
-					desc: `查询 ${x} 的后继`,
-					line: 93,
-					vars: { op, x, tree: getTreeData() },
+					desc: `${x} 的后继为 ${result}`,
+					line: 134,
+					vars: { op, x, result, tree: getTreeData() },
 				});
 			}
 		}
