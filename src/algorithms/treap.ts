@@ -235,13 +235,19 @@ export const treapAlgo: AlgoDef =
 			if (op === 1)
 			{
 				const rootRef = { value: root };
+				const searchPath: number[] = [];
+				
 				function _insert(p: { value: number }, v: number)
 				{
 					if (!p.value)
 					{
 						p.value = extend(v);
+						searchPath.push(p.value);
 						return;
 					}
+					
+					searchPath.push(p.value);
+					
 					if (v <= val[p.value])
 					{
 						const lsRef = { value: ls[p.value] };
@@ -268,9 +274,10 @@ export const treapAlgo: AlgoDef =
 				root = rootRef.value;
 
 				steps.push({
-					desc: `插入 ${x}`,
+					desc: `插入 ${x}，搜索路径：[${searchPath.map(id => val[id]).join(' → ')}]`,
 					line: 46,
 					vars: { op, x, tree: getTreeData() },
+					highlight: searchPath.map(String),
 				});
 			}
 			else if (op === 2)

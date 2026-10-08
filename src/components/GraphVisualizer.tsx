@@ -40,6 +40,10 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 		edges.push({ from: u, to: v, w });
 	}
 
+	// Get highlight info from step
+	const highlight = new Set(step?.highlight || []);
+	const vars = step?.vars || {};
+
 	// Layout nodes in a circle
 	const cx = 200, cy = 170;
 	const radius = Math.min(130, 50 + n * 10);
@@ -54,8 +58,6 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 		});
 	}
 
-	const highlight = new Set(step?.highlight || []);
-	const vars = step?.vars || {};
 	const dis = vars.dis;
 	const vis = vars.vis as boolean[] | undefined;
 

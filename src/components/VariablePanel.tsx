@@ -51,7 +51,7 @@ function renderVal(val: any): React.ReactNode
 		return <span className="text-orange-400">{val ? 'true' : 'false'}</span>;
 	if (typeof val === 'number')
 	{
-		if (val > 1e15) return <span className="text-cyan-400">INF</span>;
+		if (val > 1e15 || val === Infinity || val === -Infinity) return <span className="text-cyan-400 font-bold">INF</span>;
 		return <span className="text-cyan-400">{val}</span>;
 	}
 	if (typeof val === 'string')
@@ -66,7 +66,7 @@ function renderVal(val: any): React.ReactNode
 					[{val.map((v, i) => (
 						<span key={i}>
 							{i > 0 && ', '}
-							{typeof v === 'string' ? `"${v}"` : v === true ? 'true' : v === false ? 'false' : v > 1e15 ? 'INF' : String(v)}
+							{typeof v === 'string' ? `"${v}"` : v === true ? 'true' : v === false ? 'false' : (typeof v === 'number' && (v > 1e15 || v === Infinity || v === -Infinity)) ? <span className="text-cyan-400 font-bold">INF</span> : String(v)}
 						</span>
 					))}]
 				</span>

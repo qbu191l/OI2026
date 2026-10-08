@@ -75,6 +75,10 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 	const positions = new Map<number, { x: number; y: number }>();
 	getNodePositions(root, svgWidth / 2, 40, svgWidth * 0.8, positions);
 
+	// 获取搜索路径
+	const searchPath = step?.highlight || [];
+	const searchPathSet = new Set(searchPath);
+
 	// 渲染节点
 	function renderNode(nodeId: number)
 	{
@@ -85,8 +89,23 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 		if (!pos) return null;
 
 		const isRev = node.rev;
-		const fillColor = isRev ? '#f59e0b' : '#6366f1';
-		const strokeColor = isRev ? '#d97706' : '#4f46e5';
+		const isInSearchPath = searchPathSet.has(String(nodeId));
+		
+		let fillColor = '#6366f1';
+		let strokeColor = '#4f46e5';
+		let strokeWidth = 2;
+
+		if (isInSearchPath)
+		{
+			fillColor = '#f59e0b';
+			strokeColor = '#d97706';
+			strokeWidth = 3;
+		}
+		else if (isRev)
+		{
+			fillColor = '#f59e0b';
+			strokeColor = '#d97706';
+		}
 
 		return (
 			<g key={`node-${nodeId}`}>
@@ -97,7 +116,7 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 					r={25}
 					fill={fillColor}
 					stroke={strokeColor}
-					strokeWidth={2}
+					strokeWidth={strokeWidth}
 				/>
 				{/* 节点值 */}
 				<text
@@ -111,7 +130,7 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 					{node.val}
 				</text>
 				{/* 翻转标记 */}
-				{isRev && (
+				{isRev && !isInSearchPath && (
 					<text
 						x={pos.x + 20}
 						y={pos.y - 20}

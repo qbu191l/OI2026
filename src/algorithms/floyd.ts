@@ -109,6 +109,7 @@ export const floydAlgo: AlgoDef =
 				desc: `读入边 ${u}-${v}，权值 ${w}（无向）`,
 				line: 19,
 				vars: { u, v, w, gra: gra.map(row => [...row]) },
+				highlight: [String(u), String(v)],
 			});
 		}
 
@@ -133,6 +134,7 @@ export const floydAlgo: AlgoDef =
 							desc: `松弛：gra[${i}][${j}] 从 ${oldVal} 更新为 ${newVal}（经过 ${k}）`,
 							line: 27,
 							vars: { i, j, k, oldVal, newVal, gra: gra.map(row => [...row]) },
+							highlight: [String(i), String(j), String(k)],
 						});
 					}
 				}

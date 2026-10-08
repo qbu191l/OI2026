@@ -156,6 +156,7 @@ export const kruskalAlgo: AlgoDef =
 				desc: `检查边 ${e.u}-${e.v}，权值 ${e.w}，find_root(${e.u})=${fu}, find_root(${e.v})=${fv}`,
 				line: 48,
 				vars: { u: e.u, v: e.v, w: e.w, fu, fv, fa: [...fa], ans, cnt },
+				highlight: [String(e.u), String(e.v)],
 			});
 
 			if (fu !== fv)
@@ -169,6 +170,7 @@ export const kruskalAlgo: AlgoDef =
 					desc: `加入 MST！join(${e.u},${e.v})，ans=${ans}，cnt=${cnt}`,
 					line: 50,
 					vars: { u: e.u, v: e.v, fa: [...fa], ans, cnt, mstEdges: [...mstEdges] },
+					highlight: [String(e.u), String(e.v)],
 				});
 			}
 		}

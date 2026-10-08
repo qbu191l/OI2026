@@ -6,6 +6,7 @@ import VariablePanel from './components/VariablePanel';
 import ControlPanel from './components/ControlPanel';
 import TreapVisualizer from './components/TreapVisualizer';
 import GraphVisualizer from './components/GraphVisualizer';
+import StringVisualizer from './components/StringVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -268,6 +269,9 @@ function App()
 						)}
 						{currentStep && algo.category === 'graph' && (
 							<GraphVisualizer key={`gv-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
+						)}
+						{currentStep && algo.category === 'string' && (
+							<StringVisualizer key={`sv-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
 						)}
 
 						<VariablePanel step={currentStep} />
