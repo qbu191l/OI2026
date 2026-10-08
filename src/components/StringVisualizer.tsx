@@ -100,19 +100,18 @@ const StringVisualizer: React.FC<StringVisualizerProps> = ({ step, inputText, al
 		const s2 = vars.s2 as string | undefined;
 		const pi = vars.pi as number[] | undefined;
 
+		const pointers1 = i !== undefined ? [{ name: 'i', pos: i, color: 'text-amber-400' }] : [];
+		const pointers2 = j !== undefined ? [{ name: 'j', pos: j, color: 'text-cyan-400' }] : [];
+
 		return (
 			<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 				<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
 					<span>🔍</span> KMP 字符串匹配
 				</h3>
 
-				{s1 && renderString(s1, '主串 s1', [
-					{ name: 'i', pos: i || 0, color: 'text-amber-400' }
-				])}
+				{s1 && renderString(s1, '主串 s1', pointers1)}
 
-				{s2 && renderString(s2, '模式串 s2', [
-					{ name: 'j', pos: j || 0, color: 'text-cyan-400' }
-				])}
+				{s2 && renderString(s2, '模式串 s2', pointers2)}
 
 				{pi && (
 					<div className="mt-3">

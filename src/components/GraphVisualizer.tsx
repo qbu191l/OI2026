@@ -43,6 +43,21 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 	// Get highlight info from step
 	const highlight = new Set(step?.highlight || []);
 	const vars = step?.vars || {};
+	
+	// Get MST edges for Kruskal
+	const mstEdges = vars.mstEdges as string[] | undefined;
+	const mstEdgeSet = new Set<string>();
+	if (mstEdges)
+	{
+		for (const e of mstEdges)
+		{
+			const parts = e.split('-');
+			const u = parseInt(parts[0]);
+			const v = parseInt(parts[1].split(':')[0]);
+			mstEdgeSet.add(`${u}-${v}`);
+			mstEdgeSet.add(`${v}-${u}`);
+		}
+	}
 
 	// Layout nodes in a circle
 	const cx = 200, cy = 170;
@@ -83,6 +98,11 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 		return highlight.has(String(from)) && highlight.has(String(to));
 	};
 
+	const isMSTEdge = (from: number, to: number): boolean =>
+	{
+		return mstEdgeSet.has(`${from}-${to}`);
+	};
+
 	const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
 	return (
@@ -109,6 +129,7 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 						if (!fromNode || !toNode) return null;
 
 						const hl = isEdgeHighlighted(edge.from, edge.to);
+						const isMST = isMSTEdge(edge.from, edge.to);
 						const dx = toNode.x - fromNode.x;
 						const dy = toNode.y - fromNode.y;
 						const len = Math.sqrt(dx * dx + dy * dy);
@@ -124,13 +145,32 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 						const midX = (fromNode.x + toNode.x) / 2;
 						const midY = (fromNode.y + toNode.y) / 2;
 
+						let strokeColor = '#4b5563';
+						let strokeWidth = 1.5;
+						let fillColor = '#9ca3af';
+						let markerId = 'url(#arrow)';
+
+						if (hl)
+						{
+							strokeColor = '#f59e0b';
+							strokeWidth = 2.5;
+							fillColor = '#fbbf24';
+							markerId = 'url(#arrow-hl)';
+						}
+						else if (isMST)
+						{
+							strokeColor = '#10b981';
+							strokeWidth = 3;
+							fillColor = '#34d399';
+						}
+
 						return (
 							<g key={`edge-${idx}`}>
 								<line
 									x1={x1} y1={y1} x2={x2} y2={y2}
-									stroke={hl ? '#f59e0b' : '#4b5563'}
-									strokeWidth={hl ? 2.5 : 1.5}
-									markerEnd={hl ? 'url(#arrow-hl)' : 'url(#arrow)'}
+									stroke={strokeColor}
+									strokeWidth={strokeWidth}
+									markerEnd={markerId}
 									className="transition-all duration-300"
 								/>
 								<text
@@ -138,7 +178,7 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 									y={midY - ux * 10}
 									textAnchor="middle"
 									fontSize="10"
-									fill={hl ? '#fbbf24' : '#9ca3af'}
+									fill={fillColor}
 									className="font-mono"
 								>
 									{edge.w}

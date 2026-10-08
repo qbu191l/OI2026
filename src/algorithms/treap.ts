@@ -235,36 +235,71 @@ export const treapAlgo: AlgoDef =
 			if (op === 1)
 			{
 				const rootRef = { value: root };
-				const searchPath: number[] = [];
 				
-				function _insert(p: { value: number }, v: number)
+				function _insert(p: { value: number }, v: number, depth: number = 0)
 				{
+					const indent = '  '.repeat(depth);
+					
 					if (!p.value)
 					{
 						p.value = extend(v);
-						searchPath.push(p.value);
+						steps.push({
+							desc: `${indent}找到空位置，插入节点 ${v}（节点编号 ${p.value}）`,
+							line: 42,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
 						return;
 					}
 					
-					searchPath.push(p.value);
+					steps.push({
+						desc: `${indent}访问节点 ${p.value}（值=${val[p.value]}），比较 ${v} ${v <= val[p.value] ? '<=' : '>'} ${val[p.value]}`,
+						line: v <= val[p.value] ? 45 : 55,
+						vars: { op, x, currentNode: p.value, tree: getTreeData() },
+						highlight: [String(p.value)],
+					});
 					
 					if (v <= val[p.value])
 					{
+						steps.push({
+							desc: `${indent}往左子树递归`,
+							line: 46,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
 						const lsRef = { value: ls[p.value] };
-						_insert(lsRef, v);
+						_insert(lsRef, v, depth + 1);
 						ls[p.value] = lsRef.value;
 						if (pri[ls[p.value]] < pri[p.value])
 						{
+							steps.push({
+								desc: `${indent}左儿子优先级更小，右旋`,
+								line: 50,
+								vars: { op, x, tree: getTreeData() },
+								highlight: [String(p.value), String(ls[p.value])],
+							});
 							zag(p);
 						}
 					}
 					else
 					{
+						steps.push({
+							desc: `${indent}往右子树递归`,
+							line: 56,
+							vars: { op, x, tree: getTreeData() },
+							highlight: [String(p.value)],
+						});
 						const rsRef = { value: rs[p.value] };
-						_insert(rsRef, v);
+						_insert(rsRef, v, depth + 1);
 						rs[p.value] = rsRef.value;
 						if (pri[rs[p.value]] < pri[p.value])
 						{
+							steps.push({
+								desc: `${indent}右儿子优先级更小，左旋`,
+								line: 60,
+								vars: { op, x, tree: getTreeData() },
+								highlight: [String(p.value), String(rs[p.value])],
+							});
 							zig(p);
 						}
 					}
@@ -274,10 +309,9 @@ export const treapAlgo: AlgoDef =
 				root = rootRef.value;
 
 				steps.push({
-					desc: `插入 ${x}，搜索路径：[${searchPath.map(id => val[id]).join(' → ')}]`,
+					desc: `插入 ${x} 完成`,
 					line: 46,
 					vars: { op, x, tree: getTreeData() },
-					highlight: searchPath.map(String),
 				});
 			}
 			else if (op === 2)

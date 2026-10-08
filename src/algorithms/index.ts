@@ -10,6 +10,7 @@ import { topoSortAlgo } from './toposort';
 import { bitAlgo } from './bit';
 import { segTreeAlgo } from './segtree';
 import { kmpAlgo } from './kmp';
+import { manacherAlgo } from './manacher';
 import { knapsack01Algo } from './knapsack01';
 import { treapAlgo } from './treap';
 import { fhqTreapAlgo } from './fhq-treap';
@@ -33,6 +34,7 @@ export const allAlgorithms: AlgoDef[] =
 	fhqTreapAlgo,
 	// 字符串
 	kmpAlgo,
+	manacherAlgo,
 	// 动态规划
 	knapsack01Algo,
 ];

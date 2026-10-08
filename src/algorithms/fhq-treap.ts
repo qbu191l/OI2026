@@ -202,41 +202,125 @@ export const fhqTreapAlgo: AlgoDef =
 			return now;
 		}
 
-		function split(p: number, k: number): [number, number]
+		function split(p: number, k: number, depth: number = 0): [number, number]
 		{
-			if (!p) return [0, 0];
+			const indent = '  '.repeat(depth);
+			if (!p) 
+			{
+				steps.push({
+					desc: `${indent}split(空, ${k}) -> (0, 0)`,
+					line: 56,
+					vars: { tree: getTreeData() },
+				});
+				return [0, 0];
+			}
+			
+			steps.push({
+				desc: `${indent}split(节点${p}, ${k})：左子树大小=${tree[tree[p].ls].siz}`,
+				line: 62,
+				vars: { tree: getTreeData() },
+				highlight: [String(p)],
+			});
+			
 			pushdown(p);
 			if (k <= tree[tree[p].ls].siz)
 			{
-				const [x, y] = split(tree[p].ls, k);
+				steps.push({
+					desc: `${indent}k=${k} <= 左子树大小，往左子树分裂`,
+					line: 64,
+					vars: { tree: getTreeData() },
+					highlight: [String(p)],
+				});
+				const [x, y] = split(tree[p].ls, k, depth + 1);
 				tree[p].ls = y;
 				pushup(p);
+				steps.push({
+					desc: `${indent}分裂完成，返回 (${x}, ${p})`,
+					line: 65,
+					vars: { tree: getTreeData() },
+					highlight: [String(p)],
+				});
 				return [x, p];
 			}
 			else
 			{
-				const [x, y] = split(tree[p].rs, k - tree[tree[p].ls].siz - 1);
+				steps.push({
+					desc: `${indent}k=${k} > 左子树大小，往右子树分裂`,
+					line: 69,
+					vars: { tree: getTreeData() },
+					highlight: [String(p)],
+				});
+				const [x, y] = split(tree[p].rs, k - tree[tree[p].ls].siz - 1, depth + 1);
 				tree[p].rs = x;
 				pushup(p);
+				steps.push({
+					desc: `${indent}分裂完成，返回 (${p}, ${y})`,
+					line: 70,
+					vars: { tree: getTreeData() },
+					highlight: [String(p)],
+				});
 				return [p, y];
 			}
 		}
 
-		function merge(x: number, y: number): number
+		function merge(x: number, y: number, depth: number = 0): number
 		{
-			if (!x || !y) return x | y;
+			const indent = '  '.repeat(depth);
+			if (!x || !y) 
+			{
+				const result = x | y;
+				steps.push({
+					desc: `${indent}merge(${x}, ${y}) -> ${result}`,
+					line: 76,
+					vars: { tree: getTreeData() },
+					highlight: result ? [String(result)] : [],
+				});
+				return result;
+			}
+			
+			steps.push({
+				desc: `${indent}merge(节点${x}, 节点${y})：优先级 ${tree[x].pri} vs ${tree[y].pri}`,
+				line: 77,
+				vars: { tree: getTreeData() },
+				highlight: [String(x), String(y)],
+			});
+			
 			if (tree[x].pri < tree[y].pri)
 			{
+				steps.push({
+					desc: `${indent}节点${x}优先级更小，作为根，合并其右子树`,
+					line: 79,
+					vars: { tree: getTreeData() },
+					highlight: [String(x)],
+				});
 				pushdown(x);
-				tree[x].rs = merge(tree[x].rs, y);
+				tree[x].rs = merge(tree[x].rs, y, depth + 1);
 				pushup(x);
+				steps.push({
+					desc: `${indent}合并完成，返回节点${x}`,
+					line: 82,
+					vars: { tree: getTreeData() },
+					highlight: [String(x)],
+				});
 				return x;
 			}
 			else
 			{
+				steps.push({
+					desc: `${indent}节点${y}优先级更小，作为根，合并其左子树`,
+					line: 86,
+					vars: { tree: getTreeData() },
+					highlight: [String(y)],
+				});
 				pushdown(y);
-				tree[y].ls = merge(x, tree[y].ls);
+				tree[y].ls = merge(x, tree[y].ls, depth + 1);
 				pushup(y);
+				steps.push({
+					desc: `${indent}合并完成，返回节点${y}`,
+					line: 89,
+					vars: { tree: getTreeData() },
+					highlight: [String(y)],
+				});
 				return y;
 			}
 		}
