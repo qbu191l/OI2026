@@ -7,6 +7,8 @@ import ControlPanel from './components/ControlPanel';
 import TreapVisualizer from './components/TreapVisualizer';
 import GraphVisualizer from './components/GraphVisualizer';
 import StringVisualizer from './components/StringVisualizer';
+import BITVisualizer from './components/BITVisualizer';
+import SegTreeVisualizer from './components/SegTreeVisualizer';
 import StepLog from './components/StepLog';
 
 function App()
@@ -272,6 +274,12 @@ function App()
 						)}
 						{currentStep && algo.category === 'string' && (
 							<StringVisualizer key={`sv-${stepIdx}`} step={currentStep} inputText={inputText} algoId={algo.id} />
+						)}
+						{currentStep && algo.id === 'bit' && (
+							<BITVisualizer key={`bit-${stepIdx}`} step={currentStep} />
+						)}
+						{currentStep && algo.id === 'segtree' && (
+							<SegTreeVisualizer key={`seg-${stepIdx}`} step={currentStep} />
 						)}
 
 						<VariablePanel step={currentStep} />
