@@ -358,11 +358,13 @@ export const fhqTreapAlgo: AlgoDef =
 		{
 			root = merge(root, extend(i));
 		}
+		
+		currentRoots = [root];
 
 		steps.push({
 			desc: `建树完成，初始序列 [1, 2, ..., ${n}]`,
 			line: 101,
-			vars: { tree: getTreeData() },
+			vars: { n, m, tree: getTreeData(currentRoots) },
 		});
 
 		// 处理操作
@@ -444,7 +446,7 @@ export const fhqTreapAlgo: AlgoDef =
 		steps.push({
 			desc: `最终序列: [${result.join(', ')}]`,
 			line: 105,
-			vars: { result, tree: getTreeData() },
+			vars: { result, tree: getTreeData(currentRoots) },
 		});
 
 		return steps;

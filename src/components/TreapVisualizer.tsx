@@ -30,10 +30,39 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 	if (!step) return null;
 
 	const treeData = step.vars.tree as TreeData | undefined;
-	if (!treeData || !treeData.nodes || treeData.nodes.length === 0) return null;
+	
+	// 如果没有树数据，显示提示信息
+	if (!treeData || !treeData.nodes || treeData.nodes.length === 0) 
+	{
+		return (
+			<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+				<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+					<span>🌳</span> {algoId === 'treap' ? 'Treap 平衡树' : 'FHQ Treap 文艺平衡树'}
+				</h3>
+				<div className="text-center text-gray-500 text-sm py-8">
+					暂无树结构数据
+				</div>
+			</div>
+		);
+	}
 
 	const { root, nodes, allRoots } = treeData;
-	const roots = allRoots || [root];
+	const roots = allRoots && allRoots.length > 0 ? allRoots : (root ? [root] : []);
+	
+	// 如果没有有效的根节点，也显示提示
+	if (roots.length === 0)
+	{
+		return (
+			<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+				<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+					<span>🌳</span> {algoId === 'treap' ? 'Treap 平衡树' : 'FHQ Treap 文艺平衡树'}
+				</h3>
+				<div className="text-center text-gray-500 text-sm py-8">
+					树为空（节点数: {nodes.length}）
+				</div>
+			</div>
+		);
+	}
 
 	// 计算树的高度和布局
 	function getDepth(nodeId: number): number
@@ -78,10 +107,11 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 
 	const positions = new Map<number, { x: number; y: number }>();
 	
-	// 为每棵树分配位置
-	roots.forEach((r, idx) =>
+	// 为每棵树分配位置，过滤掉无效的根节点（0）
+	const validRoots = roots.filter(r => r !== 0);
+	validRoots.forEach((r, idx) =>
 	{
-		const offsetX = (idx + 0.5) * (svgWidth / numTrees);
+		const offsetX = (idx + 0.5) * (svgWidth / Math.max(1, validRoots.length));
 		getNodePositions(r, offsetX, 40, treeWidth * 0.8, positions);
 	});
 
@@ -234,7 +264,7 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 				<span>🌳</span> {algoId === 'treap' ? 'Treap 平衡树' : 'FHQ Treap 文艺平衡树'}
 				<span className="text-xs text-gray-500 ml-auto">
 					节点数: {maxNodeCount}
-					{numTrees > 1 && ` | ${numTrees} 棵树`}
+					{validRoots.length > 1 && ` | ${validRoots.length} 棵树`}
 				</span>
 			</h3>
 			<div className="flex justify-center items-center" style={{ minHeight: '300px' }}>
@@ -246,7 +276,7 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 					style={{ maxWidth: '100%', height: 'auto' }}
 				>
 					{/* 渲染所有树的边 */}
-					{roots.map(r => renderEdges(r))}
+					{validRoots.map(r => renderEdges(r))}
 					{/* 渲染所有节点 */}
 					{nodes.map(node => renderNode(node.id))}
 				</svg>
@@ -261,9 +291,9 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 						<div className="w-4 h-4 rounded-full bg-amber-500"></div>
 						<span>带翻转标记</span>
 					</div>
-					{numTrees > 1 && (
+					{validRoots.length > 1 && (
 						<div className="flex items-center gap-2">
-							<span>树根: {roots.join(', ')}</span>
+							<span>树根: {validRoots.join(', ')}</span>
 						</div>
 					)}
 				</div>

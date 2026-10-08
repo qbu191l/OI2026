@@ -328,7 +328,7 @@ const DEFAULT_INPUT = `5 3
 			steps.push({
 				desc: `n=${n}, m=${m}，建树完成，初始序列 [1, 2, 3, ..., ${n}]`,
 				line: 148,
-				vars: { n, m, tree: getTreeData() },
+				vars: { n, m, tree: getTreeData(), seq: Array.from({ length: n }, (_, i) => i + 1) },
 			});
 
 			for (let i = 1; i <= m && i < lines.length; ++i)
@@ -382,7 +382,7 @@ const DEFAULT_INPUT = `5 3
 			steps.push({
 				desc: `最终序列：[${result.join(', ')}]`,
 				line: 155,
-				vars: { result, tree: getTreeData() },
+				vars: { result, tree: getTreeData(), seq: result },
 			});
 
 			return steps;
