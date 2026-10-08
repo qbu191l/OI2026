@@ -202,6 +202,8 @@ export const fhqTreapAlgo: AlgoDef =
 			return now;
 		}
 
+		let currentRoots = [root];
+		
 		function split(p: number, k: number, depth: number = 0): [number, number]
 		{
 			const indent = '  '.repeat(depth);
@@ -210,7 +212,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}split(空, ${k}) -> (0, 0)`,
 					line: 56,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 				});
 				return [0, 0];
 			}
@@ -218,7 +220,7 @@ export const fhqTreapAlgo: AlgoDef =
 			steps.push({
 				desc: `${indent}split(节点${p}, ${k})：左子树大小=${tree[tree[p].ls].siz}`,
 				line: 62,
-				vars: { tree: getTreeData() },
+				vars: { tree: getTreeData(currentRoots) },
 				highlight: [String(p)],
 			});
 			
@@ -228,7 +230,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}k=${k} <= 左子树大小，往左子树分裂`,
 					line: 64,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(p)],
 				});
 				const [x, y] = split(tree[p].ls, k, depth + 1);
@@ -237,7 +239,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}分裂完成，返回 (${x}, ${p})`,
 					line: 65,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(p)],
 				});
 				return [x, p];
@@ -247,7 +249,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}k=${k} > 左子树大小，往右子树分裂`,
 					line: 69,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(p)],
 				});
 				const [x, y] = split(tree[p].rs, k - tree[tree[p].ls].siz - 1, depth + 1);
@@ -256,7 +258,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}分裂完成，返回 (${p}, ${y})`,
 					line: 70,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(p)],
 				});
 				return [p, y];
@@ -272,7 +274,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}merge(${x}, ${y}) -> ${result}`,
 					line: 76,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: result ? [String(result)] : [],
 				});
 				return result;
@@ -281,7 +283,7 @@ export const fhqTreapAlgo: AlgoDef =
 			steps.push({
 				desc: `${indent}merge(节点${x}, 节点${y})：优先级 ${tree[x].pri} vs ${tree[y].pri}`,
 				line: 77,
-				vars: { tree: getTreeData() },
+				vars: { tree: getTreeData(currentRoots) },
 				highlight: [String(x), String(y)],
 			});
 			
@@ -290,7 +292,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}节点${x}优先级更小，作为根，合并其右子树`,
 					line: 79,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(x)],
 				});
 				pushdown(x);
@@ -299,7 +301,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}合并完成，返回节点${x}`,
 					line: 82,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(x)],
 				});
 				return x;
@@ -309,7 +311,7 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}节点${y}优先级更小，作为根，合并其左子树`,
 					line: 86,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(y)],
 				});
 				pushdown(y);
@@ -318,25 +320,37 @@ export const fhqTreapAlgo: AlgoDef =
 				steps.push({
 					desc: `${indent}合并完成，返回节点${y}`,
 					line: 89,
-					vars: { tree: getTreeData() },
+					vars: { tree: getTreeData(currentRoots) },
 					highlight: [String(y)],
 				});
 				return y;
 			}
 		}
 
-		function getTreeData()
+		function getTreeData(roots?: number[])
 		{
 			const nodes: { id: number; val: number; ls: number; rs: number; rev: boolean }[] = [];
+			const visited = new Set<number>();
+			
 			function dfs(p: number)
 			{
-				if (!p) return;
+				if (!p || visited.has(p)) return;
+				visited.add(p);
 				nodes.push({ id: p, val: tree[p].val, ls: tree[p].ls, rs: tree[p].rs, rev: tree[p].rev });
 				dfs(tree[p].ls);
 				dfs(tree[p].rs);
 			}
-			dfs(root);
-			return { root, nodes, now };
+			
+			if (roots)
+			{
+				roots.forEach(r => dfs(r));
+			}
+			else
+			{
+				dfs(root);
+			}
+			
+			return { root: roots ? roots[0] : root, nodes, now, allRoots: roots || [root] };
 		}
 
 		// 建树
@@ -358,15 +372,60 @@ export const fhqTreapAlgo: AlgoDef =
 			const l = parts[0];
 			const r = parts[1];
 
+			steps.push({
+				desc: `准备翻转区间 [${l}, ${r}]，第一次分裂：split(root, ${l - 1})`,
+				line: 103,
+				vars: { l, r, tree: getTreeData(currentRoots) },
+			});
+
 			const [x, y] = split(root, l - 1);
-			const [y1, z] = split(y, r - l + 1);
-			tree[y1].rev = !tree[y1].rev;
-			root = merge(merge(x, y1), z);
+			currentRoots = [x, y].filter(r => r !== 0);
+			
+			steps.push({
+				desc: `第一次分裂完成：左树=${x}，右树=${y}`,
+				line: 103,
+				vars: { l, r, x, y, tree: getTreeData(currentRoots) },
+				highlight: currentRoots.map(String),
+			});
 
 			steps.push({
-				desc: `翻转区间 [${l}, ${r}]`,
-				line: 103,
-				vars: { l, r, tree: getTreeData() },
+				desc: `第二次分裂：split(${y}, ${r - l + 1})`,
+				line: 104,
+				vars: { l, r, tree: getTreeData(currentRoots) },
+			});
+
+			const [y1, z] = split(y, r - l + 1);
+			currentRoots = [x, y1, z].filter(r => r !== 0);
+			
+			steps.push({
+				desc: `第二次分裂完成：左树=${x}，中树=${y1}，右树=${z}`,
+				line: 104,
+				vars: { l, r, x, y1, z, tree: getTreeData(currentRoots) },
+				highlight: currentRoots.map(String),
+			});
+
+			tree[y1].rev = !tree[y1].rev;
+			
+			steps.push({
+				desc: `给中树 ${y1} 打翻转标记`,
+				line: 105,
+				vars: { l, r, tree: getTreeData(currentRoots) },
+				highlight: [String(y1)],
+			});
+
+			steps.push({
+				desc: `开始合并：merge(merge(${x}, ${y1}), ${z})`,
+				line: 106,
+				vars: { l, r, tree: getTreeData(currentRoots) },
+			});
+
+			root = merge(merge(x, y1), z);
+			currentRoots = [root];
+			
+			steps.push({
+				desc: `翻转区间 [${l}, ${r}] 完成`,
+				line: 106,
+				vars: { l, r, tree: getTreeData(currentRoots) },
 			});
 		}
 
