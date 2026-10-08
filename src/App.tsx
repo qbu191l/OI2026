@@ -139,6 +139,7 @@ function App()
 	const handlePrev = () => { setIsRunning(false); setIsPaused(false); if (stepIdx > 0) setStepIdx(p => p - 1); };
 	const handleReset = () => { setIsRunning(false); setIsPaused(false); setStepIdx(-1); setSteps([]); };
 	const handleFF = () => { setIsRunning(true); setIsPaused(false); };
+	const handleSeek = (step: number) => { setIsRunning(false); setIsPaused(false); setStepIdx(step); };
 
 	const mathAlgos = allAlgorithms.filter(a => a.category === 'math');
 	const graphAlgos = allAlgorithms.filter(a => a.category === 'graph');
@@ -283,6 +284,7 @@ function App()
 						onReset={handleReset}
 						onFastForward={handleFF}
 						onSpeed={setSpeed}
+						onSeek={handleSeek}
 					/>
 				</div>
 

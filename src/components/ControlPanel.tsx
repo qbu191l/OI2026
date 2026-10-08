@@ -15,13 +15,14 @@ interface ControlPanelProps
 	onReset: () => void;
 	onFastForward: () => void;
 	onSpeed: (s: number) => void;
+	onSeek: (step: number) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = (props) =>
 {
 	const {
 		isRunning, isPaused, stepIdx, totalSteps, speed,
-		onPlay, onPause, onNext, onPrev, onReset, onFastForward, onSpeed
+		onPlay, onPause, onNext, onPrev, onReset, onFastForward, onSpeed, onSeek
 	} = props;
 
 	return (
@@ -33,10 +34,18 @@ const ControlPanel: React.FC<ControlPanelProps> = (props) =>
 				</span>
 			</div>
 
-			<div className="w-full h-1.5 bg-gray-700 rounded-full mb-4 overflow-hidden">
-				<div
-					className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
-					style={{ width: `${totalSteps > 0 ? ((stepIdx + 1) / totalSteps) * 100 : 0}%` }}
+			<div className="mb-4">
+				<input
+					type="range"
+					min="0"
+					max={Math.max(0, totalSteps - 1)}
+					value={stepIdx}
+					onChange={(e) => onSeek(Number(e.target.value))}
+					disabled={totalSteps === 0}
+					className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer disabled:cursor-not-allowed"
+					style={{
+						background: `linear-gradient(to right, rgb(99 102 241) 0%, rgb(168 85 247) ${totalSteps > 0 ? ((stepIdx + 1) / totalSteps) * 100 : 0}%, rgb(55 65 81) ${totalSteps > 0 ? ((stepIdx + 1) / totalSteps) * 100 : 0}%, rgb(55 65 81) 100%)`
+					}}
 				/>
 			</div>
 

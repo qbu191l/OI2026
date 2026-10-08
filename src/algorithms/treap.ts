@@ -317,13 +317,18 @@ export const treapAlgo: AlgoDef =
 			else if (op === 2)
 			{
 				// 删除操作
-				const rootRef = { value: root };
+				steps.push({
+					desc: `开始删除节点 ${x}`,
+					line: 63,
+					vars: { op, x, tree: getTreeData() },
+				});
 				
-				function _remove(p: { value: number }, v: number, depth: number = 0)
+				function _remove(parent: number, isLeft: boolean, v: number, depth: number = 0)
 				{
+					const p = isLeft ? ls[parent] : rs[parent];
 					const indent = '  '.repeat(depth);
 					
-					if (!p.value)
+					if (!p)
 					{
 						steps.push({
 							desc: `${indent}节点为空，返回`,
@@ -334,64 +339,70 @@ export const treapAlgo: AlgoDef =
 					}
 					
 					steps.push({
-						desc: `${indent}访问节点 ${p.value}（值=${val[p.value]}）`,
+						desc: `${indent}访问节点 ${p}（值=${val[p]}）`,
 						line: 66,
 						vars: { op, x, tree: getTreeData() },
-						highlight: [String(p.value)],
+						highlight: [String(p)],
 					});
 					
-					if (v === val[p.value])
+					if (v === val[p])
 					{
 						steps.push({
-							desc: `${indent}找到要删除的节点 ${p.value}`,
+							desc: `${indent}找到要删除的节点 ${p}`,
 							line: 66,
 							vars: { op, x, tree: getTreeData() },
-							highlight: [String(p.value)],
+							highlight: [String(p)],
 						});
 						
-						if (!ls[p.value] && !rs[p.value])
+						if (!ls[p] && !rs[p])
 						{
 							steps.push({
 								desc: `${indent}叶子节点，直接删除`,
 								line: 70,
 								vars: { op, x, tree: getTreeData() },
 							});
-							p.value = 0;
+							if (isLeft) ls[parent] = 0;
+							else rs[parent] = 0;
 							return;
 						}
 						
-						if (!ls[p.value])
+						if (!ls[p])
 						{
 							steps.push({
 								desc: `${indent}只有右子树，用右子树替代`,
 								line: 75,
 								vars: { op, x, tree: getTreeData() },
 							});
-							p.value = rs[p.value];
+							if (isLeft) ls[parent] = rs[p];
+							else rs[parent] = rs[p];
 							return;
 						}
 						
-						if (!rs[p.value])
+						if (!rs[p])
 						{
 							steps.push({
 								desc: `${indent}只有左子树，用左子树替代`,
 								line: 80,
 								vars: { op, x, tree: getTreeData() },
 							});
-							p.value = ls[p.value];
+							if (isLeft) ls[parent] = ls[p];
+							else rs[parent] = ls[p];
 							return;
 						}
 						
-						if (pri[ls[p.value]] < pri[rs[p.value]])
+						if (pri[ls[p]] < pri[rs[p]])
 						{
 							steps.push({
 								desc: `${indent}左儿子优先级更小，右旋`,
 								line: 85,
 								vars: { op, x, tree: getTreeData() },
-								highlight: [String(p.value), String(ls[p.value])],
+								highlight: [String(p), String(ls[p])],
 							});
-							zag(p);
-							_remove({ value: rs[p.value] }, v, depth + 1);
+							const pRef = { value: p };
+							zag(pRef);
+							if (isLeft) ls[parent] = pRef.value;
+							else rs[parent] = pRef.value;
+							_remove(pRef.value, false, v, depth + 1);
 						}
 						else
 						{
@@ -399,38 +410,49 @@ export const treapAlgo: AlgoDef =
 								desc: `${indent}右儿子优先级更小，左旋`,
 								line: 90,
 								vars: { op, x, tree: getTreeData() },
-								highlight: [String(p.value), String(rs[p.value])],
+								highlight: [String(p), String(rs[p])],
 							});
-							zig(p);
-							_remove({ value: ls[p.value] }, v, depth + 1);
+							const pRef = { value: p };
+							zig(pRef);
+							if (isLeft) ls[parent] = pRef.value;
+							else rs[parent] = pRef.value;
+							_remove(pRef.value, true, v, depth + 1);
 						}
 					}
-					else if (v < val[p.value])
+					else if (v < val[p])
 					{
 						steps.push({
-							desc: `${indent}${v} < ${val[p.value]}，往左子树递归`,
+							desc: `${indent}${v} < ${val[p]}，往左子树递归`,
 							line: 94,
 							vars: { op, x, tree: getTreeData() },
-							highlight: [String(p.value)],
+							highlight: [String(p)],
 						});
-						_remove({ value: ls[p.value] }, v, depth + 1);
+						_remove(p, true, v, depth + 1);
 					}
 					else
 					{
 						steps.push({
-							desc: `${indent}${v} > ${val[p.value]}，往右子树递归`,
+							desc: `${indent}${v} > ${val[p]}，往右子树递归`,
 							line: 95,
 							vars: { op, x, tree: getTreeData() },
-							highlight: [String(p.value)],
+							highlight: [String(p)],
 						});
-						_remove({ value: rs[p.value] }, v, depth + 1);
+						_remove(p, false, v, depth + 1);
 					}
 					
-					if (p.value) pushup(p.value);
+					if (p) pushup(p);
 				}
 				
-				_remove(rootRef, x);
-				root = rootRef.value;
+				// 创建虚拟根节点来简化删除逻辑
+				const virtualRoot = now + 1;
+				ls[virtualRoot] = root;
+				rs[virtualRoot] = 0;
+				val[virtualRoot] = Infinity;
+				pri[virtualRoot] = -Infinity;
+				siz[virtualRoot] = siz[root] + 1;
+				
+				_remove(virtualRoot, true, x);
+				root = ls[virtualRoot];
 				
 				steps.push({
 					desc: `删除 ${x} 完成`,
