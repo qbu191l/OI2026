@@ -161,64 +161,230 @@ const DEFAULT_INPUT = `5 3
 1 5
 2 4`;
 
-export const splayAlgo: AlgoDef =
-{
-	id: 'splay',
-	name: 'Splay 文艺平衡树',
-	category: 'tree',
-	desc: '文艺平衡树使用 Splay 实现区间翻转操作，通过旋转和懒标记维护序列。',
-	code: CODE,
-	defaultInput: DEFAULT_INPUT,
-	run: (input: string): SimStep[] =>
+	export const splayAlgo: AlgoDef =
 	{
-		const steps: SimStep[] = [];
-		const lines = input.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-		if (lines.length < 1) return steps;
-
-		const firstLine = lines[0].split(/\s+/).map(Number);
-		const n = firstLine[0];
-		const m = firstLine[1];
-
-		steps.push({
-			desc: `n=${n}, m=${m}，初始序列 [1, 2, 3, ..., ${n}]`,
-			line: 62,
-			vars: { n, m, seq: Array.from({ length: n }, (_, i) => i + 1) },
-		});
-
-		const seq = Array.from({ length: n }, (_, i) => i + 1);
-
-		for (let i = 1; i <= m && i < lines.length; ++i)
+		id: 'splay',
+		name: 'Splay 文艺平衡树',
+		category: 'tree',
+		desc: '文艺平衡树使用 Splay 实现区间翻转操作，通过旋转和懒标记维护序列。',
+		code: CODE,
+		defaultInput: DEFAULT_INPUT,
+		run: (input: string): SimStep[] =>
 		{
-			const parts = lines[i].split(/\s+/).map(Number);
-			const l = parts[0];
-			const r = parts[1];
+			const steps: SimStep[] = [];
+			const lines = input.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+			if (lines.length < 1) return steps;
 
-			steps.push({
-				desc: `翻转区间 [${l}, ${r}]`,
-				line: 66,
-				vars: { l, r, seq: [...seq] },
-			});
+			const firstLine = lines[0].split(/\s+/).map(Number);
+			const n = firstLine[0];
+			const m = firstLine[1];
 
-			const left = l - 1;
-			const right = r - 1;
-			for (let j = left; j < (left + right) / 2 + 0.5; ++j)
+			// 模拟 Splay 树
+			interface SplayNode
 			{
-				[seq[j], seq[left + right - j]] = [seq[left + right - j], seq[j]];
+				fa: number;
+				ch: [number, number];
+				val: number;
+				siz: number;
+				cnt: number;
+				lz: boolean;
 			}
 
+			const nodes: SplayNode[] = [{ fa: 0, ch: [0, 0], val: 0, siz: 0, cnt: 0, lz: false }];
+			let rt = 0;
+			let idx = 0;
+
+			function cid(x: number): number
+			{
+				return nodes[nodes[x].fa].ch[1] === x ? 1 : 0;
+			}
+
+			function pushup(x: number)
+			{
+				nodes[x].siz = nodes[nodes[x].ch[0]].siz + nodes[nodes[x].ch[1]].siz + nodes[x].cnt;
+			}
+
+			function rotate_(x: number)
+			{
+				const y = nodes[x].fa;
+				const z = nodes[y].fa;
+				const id = cid(x);
+				nodes[y].ch[id] = nodes[x].ch[id ^ 1];
+				nodes[x].ch[id ^ 1] = y;
+				if (z) nodes[z].ch[cid(y)] = x;
+				if (nodes[y].ch[id]) nodes[nodes[y].ch[id]].fa = y;
+				nodes[y].fa = x;
+				nodes[x].fa = z;
+				pushup(y);
+				pushup(x);
+			}
+
+			function splay(z: number, x: number)
+			{
+				let y = nodes[x].fa;
+				const f = nodes[z].fa;
+				while (y !== f)
+				{
+					if (nodes[y].fa !== f)
+					{
+						rotate_(cid(x) === cid(y) ? y : x);
+					}
+					rotate_(x);
+					y = nodes[x].fa;
+				}
+				return x;
+			}
+
+			function extend(v: number): number
+			{
+				++idx;
+				nodes.push({
+					fa: 0,
+					ch: [0, 0],
+					val: v,
+					siz: 1,
+					cnt: 1,
+					lz: false,
+				});
+				return idx;
+			}
+
+			function build(n: number)
+			{
+				for (let i = 0; i <= n + 1; ++i)
+				{
+					const newNode = extend(i);
+					nodes[newNode].ch[0] = rt;
+					if (rt) nodes[rt].fa = newNode;
+					rt = newNode;
+				}
+				rt = splay(rt, 1);
+			}
+
+			function lzrev(x: number)
+			{
+				[nodes[x].ch[0], nodes[x].ch[1]] = [nodes[x].ch[1], nodes[x].ch[0]];
+				nodes[x].lz = !nodes[x].lz;
+			}
+
+			function pushdown(x: number)
+			{
+				if (nodes[x].lz)
+				{
+					if (nodes[x].ch[0]) lzrev(nodes[x].ch[0]);
+					if (nodes[x].ch[1]) lzrev(nodes[x].ch[1]);
+					nodes[x].lz = false;
+				}
+			}
+
+			function find_kth(k: number): number
+			{
+				if (k < 0) k += nodes[rt].siz + 1;
+				let x = rt;
+				while (true)
+				{
+					pushdown(x);
+					if (nodes[nodes[x].ch[0]].siz >= k)
+					{
+						x = nodes[x].ch[0];
+					}
+					else if (nodes[nodes[x].ch[0]].siz + nodes[x].cnt >= k)
+					{
+						break;
+					}
+					else
+					{
+						k -= nodes[nodes[x].ch[0]].siz + nodes[x].cnt;
+						x = nodes[x].ch[1];
+					}
+				}
+				rt = splay(rt, x);
+				return x;
+			}
+
+			function getTreeData()
+			{
+				const treeNodes: { id: number; val: number; ls: number; rs: number; rev: boolean; siz: number }[] = [];
+				function dfs(p: number)
+				{
+					if (!p) return;
+					treeNodes.push({
+						id: p,
+						val: nodes[p].val,
+						ls: nodes[p].ch[0],
+						rs: nodes[p].ch[1],
+						rev: nodes[p].lz,
+						siz: nodes[p].siz,
+					});
+					dfs(nodes[p].ch[0]);
+					dfs(nodes[p].ch[1]);
+				}
+				dfs(rt);
+				return { root: rt, nodes: treeNodes, now: idx };
+			}
+
+			build(n);
+
 			steps.push({
-				desc: `翻转后：[${seq.join(', ')}]`,
-				line: 67,
-				vars: { l, r, seq: [...seq] },
+				desc: `n=${n}, m=${m}，建树完成，初始序列 [1, 2, 3, ..., ${n}]`,
+				line: 148,
+				vars: { n, m, tree: getTreeData() },
 			});
+
+			for (let i = 1; i <= m && i < lines.length; ++i)
+			{
+				const parts = lines[i].split(/\s+/).map(Number);
+				const l = parts[0];
+				const r = parts[1];
+
+				steps.push({
+					desc: `翻转区间 [${l}, ${r}]：查找第 ${l} 个节点`,
+					line: 150,
+					vars: { l, r, tree: getTreeData() },
+					highlight: [String(find_kth(l))],
+				});
+
+				steps.push({
+					desc: `查找第 ${r + 2 - l} 个节点`,
+					line: 151,
+					vars: { l, r, tree: getTreeData() },
+					highlight: [String(find_kth(r + 2 - l))],
+				});
+
+				const x = nodes[nodes[rt].ch[1]].ch[0];
+				lzrev(x);
+				pushdown(x);
+				rt = splay(rt, x);
+
+				steps.push({
+					desc: `翻转节点 ${x}，打懒标记`,
+					line: 152,
+					vars: { l, r, tree: getTreeData() },
+					highlight: [String(x)],
+				});
+			}
+
+			// 输出结果
+			const result: number[] = [];
+			function dfs(p: number)
+			{
+				if (!p) return;
+				pushdown(p);
+				dfs(nodes[p].ch[0]);
+				if (nodes[p].val !== 0 && nodes[p].val !== n + 1)
+				{
+					result.push(nodes[p].val);
+				}
+				dfs(nodes[p].ch[1]);
+			}
+			dfs(rt);
+
+			steps.push({
+				desc: `最终序列：[${result.join(', ')}]`,
+				line: 155,
+				vars: { result, tree: getTreeData() },
+			});
+
+			return steps;
 		}
-
-		steps.push({
-			desc: `最终序列：[${seq.join(', ')}]`,
-			line: 69,
-			vars: { seq: [...seq] },
-		});
-
-		return steps;
-	}
-};
+	};
