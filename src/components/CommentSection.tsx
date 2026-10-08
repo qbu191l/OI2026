@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { safeStorage, safeJsonParse } from '../utils/validation';
 
 interface Comment
 {
@@ -25,10 +26,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ algoId, algoName }) =>
 
 	useEffect(() =>
 	{
-		const stored = localStorage.getItem(`comments-${algoId}`);
+		const stored = safeStorage.get(`comments-${algoId}`);
 		if (stored)
 		{
-			setComments(JSON.parse(stored));
+			setComments(safeJsonParse(stored, []));
 		}
 	}, [algoId]);
 
@@ -36,6 +37,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ algoId, algoName }) =>
 	{
 		e.preventDefault();
 		if (!author.trim() || !content.trim()) return;
+
+		// 验证评论内容长度
+		if (content.length > 1000)
+		{
+			alert('评论内容不能超过 1000 字符');
+			return;
+		}
+
+		if (author.length > 50)
+		{
+			alert('昵称不能超过 50 字符');
+			return;
+		}
 
 		const newComment: Comment =
 		{
@@ -48,7 +62,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ algoId, algoName }) =>
 
 		const updated = [newComment, ...comments];
 		setComments(updated);
-		localStorage.setItem(`comments-${algoId}`, JSON.stringify(updated));
+		safeStorage.set(`comments-${algoId}`, JSON.stringify(updated));
 
 		setContent('');
 		setType('other');
@@ -59,7 +73,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ algoId, algoName }) =>
 	{
 		const updated = comments.filter(c => c.id !== id);
 		setComments(updated);
-		localStorage.setItem(`comments-${algoId}`, JSON.stringify(updated));
+		safeStorage.set(`comments-${algoId}`, JSON.stringify(updated));
 	};
 
 	const formatTime = (timestamp: number) =>

@@ -21,6 +21,7 @@ import LCAVisualizer from './components/LCAVisualizer';
 import SplayVisualizer from './components/SplayVisualizer';
 import StepLog from './components/StepLog';
 import CommentSection from './components/CommentSection';
+import { validateInput, validateSteps, DEFAULT_CONFIG } from './utils/validation';
 
 function App()
 {
@@ -31,6 +32,7 @@ function App()
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
 	const [speed, setSpeed] = useState(800);
+	const [error, setError] = useState<string | null>(null);
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const algo = allAlgorithms[selectedAlgo];
@@ -67,7 +69,47 @@ function App()
 
 	const handleRun = useCallback(() =>
 	{
-		const newSteps = algo.run(inputText);
+		setError(null);
+
+		// 1. 验证输入
+		const inputValidation = validateInput(inputText, DEFAULT_CONFIG);
+		if (!inputValidation.valid)
+		{
+			setError(inputValidation.error || '输入验证失败');
+			return;
+		}
+
+		// 2. 执行算法（带超时保护）
+		const startTime = performance.now();
+		let newSteps: SimStep[];
+
+		try
+		{
+			newSteps = algo.run(inputText);
+		}
+		catch (e)
+		{
+			setError(`算法执行出错: ${e instanceof Error ? e.message : '未知错误'}`);
+			return;
+		}
+
+		const executionTime = performance.now() - startTime;
+
+		// 3. 检查执行时间
+		if (executionTime > DEFAULT_CONFIG.maxExecutionTime)
+		{
+			setError(`执行时间过长（${(executionTime / 1000).toFixed(2)}秒），请减小输入规模`);
+			return;
+		}
+
+		// 4. 验证步骤数
+		const stepsValidation = validateSteps(newSteps, DEFAULT_CONFIG);
+		if (!stepsValidation.valid)
+		{
+			setError(stepsValidation.error || '步骤数验证失败');
+			return;
+		}
+
 		setSteps(newSteps);
 		setStepIdx(0);
 		setIsRunning(true);
@@ -180,21 +222,49 @@ function App()
 					</div>
 				</div>
 
+				{/* 错误提示 */}
+				{error && (
+					<div className="mb-4 bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+						<div className="flex items-start justify-between">
+							<div className="flex items-start gap-2">
+								<span className="text-red-400 text-lg">⚠️</span>
+								<div>
+									<h3 className="text-sm font-semibold text-red-400 mb-1">输入验证失败</h3>
+									<p className="text-xs text-red-300">{error}</p>
+								</div>
+							</div>
+							<button
+								onClick={() => setError(null)}
+								className="text-red-400 hover:text-red-300 text-lg"
+							>
+								×
+							</button>
+						</div>
+					</div>
+				)}
+
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
 					<div className="lg:col-span-2 bg-gray-900 rounded-xl border border-gray-700 overflow-hidden">
 						<div className="flex items-center justify-between px-4 py-2 bg-gray-800/50 border-b border-gray-700">
 							<span className="text-xs text-gray-400 font-medium">📥 样例输入</span>
-							<button
-								onClick={handleRun}
-								className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors"
-							>
-								▶ 运行
-							</button>
+							<div className="flex items-center gap-2">
+								<span className="text-[10px] text-gray-500">
+									{inputText.length} / {DEFAULT_CONFIG.maxInputSize} 字符
+								</span>
+								<button
+									onClick={handleRun}
+									className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors"
+								>
+									▶ 运行
+								</button>
+							</div>
 						</div>
 						<textarea
 							value={inputText}
 							onChange={(e) => setInputText(e.target.value)}
-							className="w-full h-32 bg-gray-950 p-3 text-xs font-mono text-gray-300 placeholder-gray-700 focus:outline-none resize-none"
+							className={`w-full h-32 bg-gray-950 p-3 text-xs font-mono text-gray-300 placeholder-gray-700 focus:outline-none resize-none ${
+								inputText.length > DEFAULT_CONFIG.maxInputSize ? 'border-red-500' : ''
+							}`}
 							placeholder="粘贴题目输入数据..."
 							spellCheck={false}
 						/>
