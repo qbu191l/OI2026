@@ -12,6 +12,7 @@ import { dinicAlgo } from './dinic';
 import { hlppAlgo } from './hlpp';
 import { mcmfAlgo } from './mcmf';
 import { tarjanSCCAlgo } from './tarjanscc';
+import { edmondsAlgo } from './edmonds';
 import { bitAlgo } from './bit';
 import { segTreeAlgo } from './segtree';
 import { treapAlgo } from './treap';
@@ -63,6 +64,7 @@ export const allAlgorithms: AlgoDef[] =
 	hlppAlgo,
 	mcmfAlgo,
 	tarjanSCCAlgo,
+	edmondsAlgo,
 	// 树论
 	bitAlgo,
 	segTreeAlgo,

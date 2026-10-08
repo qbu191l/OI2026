@@ -148,14 +148,17 @@ const GraphVisualizer: React.FC<GraphVisualizerProps> = ({ step, inputText, algo
 						let strokeColor = '#4b5563';
 						let strokeWidth = 1.5;
 						let fillColor = '#9ca3af';
-						let markerId = 'url(#arrow)';
+						
+						// 判断是否为有向图算法
+						const isDirected = ['dijkstra', 'spfa', 'floyd', 'tarjanscc', 'ek', 'dinic', 'hlpp', 'mcmf'].includes(algoId);
+						let markerId = isDirected ? 'url(#arrow)' : undefined;
 
 						if (hl)
 						{
 							strokeColor = '#f59e0b';
 							strokeWidth = 2.5;
 							fillColor = '#fbbf24';
-							markerId = 'url(#arrow-hl)';
+							markerId = isDirected ? 'url(#arrow-hl)' : undefined;
 						}
 						else if (isMST)
 						{
