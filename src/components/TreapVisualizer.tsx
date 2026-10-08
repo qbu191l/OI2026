@@ -193,13 +193,26 @@ const TreapVisualizer: React.FC<TreapVisualizerProps> = ({ step, algoId }) =>
 		return edges;
 	}
 
+	// 自适应缩放
+	const maxNodeCount = nodes.length;
+	const scale = Math.min(1, 600 / svgWidth, 400 / svgHeight);
+	const displayWidth = svgWidth * scale;
+	const displayHeight = svgHeight * scale;
+
 	return (
 		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
 				<span>🌳</span> {algoId === 'treap' ? 'Treap 平衡树' : 'FHQ Treap 文艺平衡树'}
+				<span className="text-xs text-gray-500 ml-auto">节点数: {maxNodeCount}</span>
 			</h3>
-			<div className="overflow-x-auto">
-				<svg width={svgWidth} height={svgHeight} className="mx-auto">
+			<div className="flex justify-center items-center" style={{ minHeight: '300px' }}>
+				<svg 
+					width={displayWidth} 
+					height={displayHeight} 
+					viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+					className="mx-auto"
+					style={{ maxWidth: '100%', height: 'auto' }}
+				>
 					{/* 渲染边 */}
 					{renderEdges(root)}
 					{/* 渲染节点 */}

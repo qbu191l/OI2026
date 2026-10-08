@@ -84,7 +84,10 @@ function App()
 	const handleReset = () => { setIsRunning(false); setIsPaused(false); setStepIdx(-1); setSteps([]); };
 	const handleFF = () => { setIsRunning(true); setIsPaused(false); };
 
+	const graphAlgos = allAlgorithms.filter(a => a.category === 'graph');
 	const treeAlgos = allAlgorithms.filter(a => a.category === 'tree');
+	const stringAlgos = allAlgorithms.filter(a => a.category === 'string');
+	const dpAlgos = allAlgorithms.filter(a => a.category === 'dp');
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-slate-950 text-white">
@@ -98,7 +101,7 @@ function App()
 							<h1 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
 								算法可视化学习平台
 							</h1>
-							<p className="text-[10px] text-gray-500">Algorithm Visualizer — 平衡树专题</p>
+							<p className="text-[10px] text-gray-500">Algorithm Visualizer — 图论 · 树论 · 字符串 · DP</p>
 						</div>
 					</div>
 				</div>
@@ -107,24 +110,94 @@ function App()
 			<main className="max-w-[1400px] mx-auto px-4 py-4">
 				<div className="mb-4">
 					<div className="flex flex-wrap gap-2 mb-3">
-						<span className="text-xs text-gray-500 self-center mr-1">平衡树:</span>
-						{treeAlgos.map((a) =>
-						{
-							const idx = allAlgorithms.indexOf(a);
-							return (
-								<button
-									key={a.id}
-									onClick={() => setSelectedAlgo(idx)}
-									className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-										selectedAlgo === idx
-											? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-											: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-									}`}
-								>
-									{a.name}
-								</button>
-							);
-						})}
+						{graphAlgos.length > 0 && (
+							<>
+								<span className="text-xs text-gray-500 self-center mr-1">图论:</span>
+								{graphAlgos.map((a) =>
+								{
+									const idx = allAlgorithms.indexOf(a);
+									return (
+										<button
+											key={a.id}
+											onClick={() => setSelectedAlgo(idx)}
+											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+												selectedAlgo === idx
+													? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+											}`}
+										>
+											{a.name}
+										</button>
+									);
+								})}
+							</>
+						)}
+						{treeAlgos.length > 0 && (
+							<>
+								<span className="text-xs text-gray-500 self-center ml-3 mr-1">树论:</span>
+								{treeAlgos.map((a) =>
+								{
+									const idx = allAlgorithms.indexOf(a);
+									return (
+										<button
+											key={a.id}
+											onClick={() => setSelectedAlgo(idx)}
+											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+												selectedAlgo === idx
+													? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+											}`}
+										>
+											{a.name}
+										</button>
+									);
+								})}
+							</>
+						)}
+						{stringAlgos.length > 0 && (
+							<>
+								<span className="text-xs text-gray-500 self-center ml-3 mr-1">字符串:</span>
+								{stringAlgos.map((a) =>
+								{
+									const idx = allAlgorithms.indexOf(a);
+									return (
+										<button
+											key={a.id}
+											onClick={() => setSelectedAlgo(idx)}
+											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+												selectedAlgo === idx
+													? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
+													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+											}`}
+										>
+											{a.name}
+										</button>
+									);
+								})}
+							</>
+						)}
+						{dpAlgos.length > 0 && (
+							<>
+								<span className="text-xs text-gray-500 self-center ml-3 mr-1">动态规划:</span>
+								{dpAlgos.map((a) =>
+								{
+									const idx = allAlgorithms.indexOf(a);
+									return (
+										<button
+											key={a.id}
+											onClick={() => setSelectedAlgo(idx)}
+											className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+												selectedAlgo === idx
+													? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20'
+													: 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+											}`}
+										>
+											{a.name}
+										</button>
+									);
+								})}
+							</>
+						)}
 					</div>
 
 					<div className="bg-gray-800/40 rounded-lg border border-gray-700/50 px-4 py-2">
