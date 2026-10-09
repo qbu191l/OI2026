@@ -29,7 +29,25 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 	const highlight = new Set(step.highlight || []);
 	const nodes = vars.gsamNodes as GSAMNode[] | undefined;
 
-	if (!nodes || nodes.length === 0) return null;
+	// 即使节点为空也显示基本信息
+	if (!nodes || nodes.length === 0)
+	{
+		return (
+			<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+				<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+					<span>🔗</span> 广义后缀自动机 (GSAM)
+				</h3>
+				<div className="mb-2 text-xs text-gray-400">
+					输入字符串: {strings.map((s, i) => (
+						<span key={i} className="text-cyan-400 font-mono">"{s}"{i < strings.length - 1 ? ', ' : ''}</span>
+					))}
+				</div>
+				<div className="text-center text-gray-500 text-sm py-8">
+					正在构建 GSAM...
+				</div>
+			</div>
+		);
+	}
 
 	const positions = useMemo(() =>
 	{
@@ -58,7 +76,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 		});
 
 		return pos;
-	}, [nodes.map(n => `${n.id}:${n.len}`).join(',')]);
+	}, [JSON.stringify(nodes)]);
 
 	const svgHeight = useMemo(() =>
 	{
