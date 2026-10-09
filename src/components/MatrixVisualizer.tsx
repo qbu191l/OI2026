@@ -37,6 +37,15 @@ const MatrixVisualizer: React.FC<MatrixVisualizerProps> = ({ step }) =>
 	const cellSize = 60;
 	const fontSize = 14;
 
+	// 格式化数字，处理大数和科学计数法
+	const formatNumber = (num: number): string =>
+	{
+		if (Math.abs(num) < 1e-9) return '0';
+		if (Math.abs(num) >= 1e6) return num.toExponential(2);
+		if (Math.abs(num) >= 1000) return num.toFixed(0);
+		return num.toFixed(2);
+	};
+
 	return (
 		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
@@ -140,7 +149,7 @@ const MatrixVisualizer: React.FC<MatrixVisualizerProps> = ({ step }) =>
 														fontSize: `${fontSize}px`,
 													}}
 												>
-													{Math.abs(val) < 1e-9 ? '0' : val.toFixed(2)}
+													{formatNumber(val)}
 												</div>
 											);
 										})}

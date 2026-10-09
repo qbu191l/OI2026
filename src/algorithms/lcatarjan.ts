@@ -71,7 +71,7 @@ signed main()
 	return 0;
 }`;
 
-const DEFAULT_INPUT = `5 3 1
+const DEFAULT_INPUT = `5 2 1
 1 2
 1 3
 2 4

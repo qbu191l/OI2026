@@ -61,8 +61,21 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 		}
 
 		const nodeRadius = 28;
-		const levelHeight = 90;
-		const nodeSpacing = 70;
+		const maxLevels = levels.length;
+		
+		// 动态调整层高度，避免过长
+		let levelHeight = 90;
+		let nodeSpacing = 70;
+		
+		if (maxLevels > 8)
+		{
+			levelHeight = Math.max(50, 600 / maxLevels);
+			nodeSpacing = Math.max(50, 60);
+		}
+		else if (maxLevels > 5)
+		{
+			levelHeight = Math.max(60, 500 / maxLevels);
+		}
 
 		levels.forEach((level, idx) =>
 		{
@@ -81,7 +94,20 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 	const svgHeight = useMemo(() =>
 	{
 		const maxLen = Math.max(...nodes.map(n => n.len));
-		return Math.max(300, (maxLen + 1) * 70 + 80);
+		const maxLevels = maxLen + 1;
+		
+		// 动态计算高度
+		let levelHeight = 90;
+		if (maxLevels > 8)
+		{
+			levelHeight = Math.max(50, 600 / maxLevels);
+		}
+		else if (maxLevels > 5)
+		{
+			levelHeight = Math.max(60, 500 / maxLevels);
+		}
+		
+		return Math.max(300, maxLevels * levelHeight + 80);
 	}, [nodes]);
 
 	const nodeRadius = 28;
@@ -101,10 +127,10 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 				<svg viewBox={`0 0 500 ${svgHeight}`} className="w-full max-w-[700px] h-auto">
 					<defs>
 						<marker id="gsam-link" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-							<polygon points="0 0, 7 2.5, 0 5" fill="#6b7280" />
+							<polygon points="0 0, 7 2.5, 0 5" fill="#ef4444" />
 						</marker>
 						<marker id="gsam-link-hl" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-							<polygon points="0 0, 7 2.5, 0 5" fill="#f59e0b" />
+							<polygon points="0 0, 7 2.5, 0 5" fill="#fbbf24" />
 						</marker>
 						<marker id="gsam-trans" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
 							<polygon points="0 0, 7 2.5, 0 5" fill="#8b5cf6" />
@@ -179,7 +205,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 								key={`link-${node.id}`}
 								d={`M ${fromPos.x} ${fromPos.y + nodeRadius} Q ${controlX} ${controlY} ${toPos.x} ${toPos.y - nodeRadius}`}
 								fill="none"
-								stroke={isHL ? '#f59e0b' : '#6b7280'}
+								stroke={isHL ? '#fbbf24' : '#ef4444'}
 								strokeWidth={isHL ? 2 : 1}
 								strokeDasharray="4,3"
 								markerEnd={isHL ? 'url(#gsam-link-hl)' : 'url(#gsam-link)'}
@@ -233,7 +259,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 				</span>
 				<span className="flex items-center gap-1">
 					<svg width="20" height="10" className="inline-block">
-						<path d="M 2 8 Q 10 2 18 8" stroke="#6b7280" strokeWidth="1" strokeDasharray="2,2" fill="none" />
+						<path d="M 2 8 Q 10 2 18 8" stroke="#ef4444" strokeWidth="1" strokeDasharray="2,2" fill="none" />
 					</svg>
 					后缀链接
 				</span>
