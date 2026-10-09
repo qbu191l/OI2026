@@ -91,6 +91,34 @@ signed main()
 
 const DEFAULT_INPUT = `abab`;
 
+interface SAMNode
+{
+	id: number;
+	len: number;
+	fa: number;
+	trans: { char: string; to: number }[];
+}
+
+function buildSAMNodes(
+	tot: number,
+	len: number[],
+	fa: number[],
+	ch: Map<number, number>[]
+): SAMNode[]
+{
+	const nodes: SAMNode[] = [];
+	for (let i = 1; i <= tot; ++i)
+	{
+		const trans: { char: string; to: number }[] = [];
+		for (const [c, to] of ch[i].entries())
+		{
+			trans.push({ char: String.fromCharCode('a'.charCodeAt(0) + c), to });
+		}
+		nodes.push({ id: i, len: len[i], fa: fa[i], trans });
+	}
+	return nodes;
+}
+
 export const samAlgo: AlgoDef =
 {
 	id: 'sam',
@@ -106,7 +134,7 @@ export const samAlgo: AlgoDef =
 		if (s.length === 0) return steps;
 
 		const n = s.length;
-		
+
 		const fa: number[] = new Array(2 * n + 2).fill(0);
 		const len: number[] = new Array(2 * n + 2).fill(0);
 		const cnt: number[] = new Array(2 * n + 2).fill(0);
@@ -114,9 +142,9 @@ export const samAlgo: AlgoDef =
 		let tot = 1, np = 1;
 
 		steps.push({
-			desc: `字符串 s="${s}"，长度 n=${n}，初始化 SAM`,
+			desc: `字符串 s="${s}"，长度 n=${n}，初始化 SAM（只有根节点 1）`,
 			line: 62,
-			vars: { s, n, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+			vars: { s, n, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 		});
 
 		for (let i = 0; i < n; ++i)
@@ -130,7 +158,7 @@ export const samAlgo: AlgoDef =
 			steps.push({
 				desc: `extend('${s[i]}')：新建节点 ${np}，len[${np}]=${len[np]}`,
 				line: 32,
-				vars: { i, c: s[i], np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+				vars: { i, c: s[i], np, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 				highlight: [String(np)],
 			});
 
@@ -138,9 +166,9 @@ export const samAlgo: AlgoDef =
 			while (cur && !ch[cur].has(c))
 			{
 				steps.push({
-					desc: `从节点 ${cur} 添加转移 '${s[i]}' → ${np}`,
+					desc: `沿 parent 链上行：节点 ${cur} 没有 '${s[i]}' 转移，添加 ${cur} →${s[i]}→ ${np}`,
 					line: 36,
-					vars: { cur, np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					vars: { cur, np, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 					highlight: [String(cur), String(np)],
 				});
 				ch[cur].set(c, np);
@@ -151,9 +179,9 @@ export const samAlgo: AlgoDef =
 			{
 				fa[np] = 1;
 				steps.push({
-					desc: `fa[${np}]=1（无匹配前缀）`,
+					desc: `到达根节点，fa[${np}]=1`,
 					line: 40,
-					vars: { np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					vars: { np, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 					highlight: [String(np), '1'],
 				});
 			}
@@ -161,9 +189,9 @@ export const samAlgo: AlgoDef =
 			{
 				const q = ch[cur].get(c)!;
 				steps.push({
-					desc: `找到节点 ${cur} 已有转移 '${s[i]}' → ${q}`,
+					desc: `在节点 ${cur} 找到已有转移 '${s[i]}' → ${q}，检查 len[${q}]=${len[q]} vs len[${cur}]+1=${len[cur] + 1}`,
 					line: 44,
-					vars: { cur, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					vars: { cur, q, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 					highlight: [String(cur), String(q)],
 				});
 
@@ -171,9 +199,9 @@ export const samAlgo: AlgoDef =
 				{
 					fa[np] = q;
 					steps.push({
-						desc: `len[${q}]=${len[q]}=len[${cur}]+1，fa[${np}]=${q}`,
+						desc: `len[${q}]=${len[q]} == len[${cur}]+1，直接设置 fa[${np}]=${q}`,
 						line: 47,
-						vars: { np, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						vars: { np, q, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 						highlight: [String(np), String(q)],
 					});
 				}
@@ -187,40 +215,48 @@ export const samAlgo: AlgoDef =
 					ch[nq] = new Map(ch[q]);
 
 					steps.push({
-						desc: `len[${q}]=${len[q]}≠len[${cur}]+1，克隆节点 ${nq}`,
+						desc: `len[${q}]=${len[q]} ≠ len[${cur}]+1=${len[cur] + 1}，克隆节点 ${nq}（len=${len[nq]}, fa=${fa[nq]}）`,
 						line: 51,
-						vars: { nq, q, cur, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						vars: { nq, q, cur, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 						highlight: [String(nq), String(q)],
 					});
 
 					steps.push({
-						desc: `设置：len[${nq}]=${len[nq]}, fa[${nq}]=${fa[nq]}, fa[${q}]=${nq}, fa[${np}]=${nq}`,
+						desc: `重定向：fa[${q}]=${nq}, fa[${np}]=${nq}`,
 						line: 54,
-						vars: { nq, q, np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						vars: { nq, q, np, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 						highlight: [String(nq), String(q), String(np)],
 					});
 
-					while (cur && ch[cur].get(c) === q)
+					let walkP = cur;
+					while (walkP && ch[walkP].get(c) === q)
 					{
 						steps.push({
-							desc: `更新节点 ${cur} 的转移：'${s[i]}' → ${nq}`,
+							desc: `沿 parent 链重定向：节点 ${walkP} 的 '${s[i]}' 转移从 ${q} 改为 ${nq}`,
 							line: 58,
-							vars: { cur, nq, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
-							highlight: [String(cur), String(nq)],
+							vars: { walkP, nq, q, tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
+							highlight: [String(walkP), String(nq)],
 						});
-						ch[cur].set(c, nq);
-						cur = fa[cur];
+						ch[walkP].set(c, nq);
+						walkP = fa[walkP];
 					}
 				}
 			}
+
+			steps.push({
+				desc: `extend('${s[i]}') 完成，当前 SAM 共 ${tot} 个节点`,
+				line: 62,
+				vars: { i, c: s[i], tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
+			});
 		}
 
 		steps.push({
 			desc: `SAM 构建完成，共 ${tot} 个节点`,
 			line: 65,
-			vars: { tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+			vars: { tot, samNodes: buildSAMNodes(tot, len, fa, ch) },
 		});
 
+		// DFS 计算 cnt
 		const heads: number[] = new Array(tot + 1).fill(0);
 		const es_to: number[] = [0, 0];
 		const es_nxt: number[] = [0, 0];
@@ -258,7 +294,7 @@ export const samAlgo: AlgoDef =
 		steps.push({
 			desc: `最长重复子串长度 = ${ans}`,
 			line: 68,
-			vars: { ans, cnt: cnt.slice(0, tot + 1) },
+			vars: { ans, cnt: cnt.slice(0, tot + 1), samNodes: buildSAMNodes(tot, len, fa, ch) },
 		});
 
 		return steps;

@@ -10,86 +10,34 @@ interface ACVisualizerProps
 interface ACNode
 {
 	id: number;
-	x: number;
-	y: number;
-	char?: string;
+	children: { char: string; to: number }[];
+	fail: number;
+	cnt: number;
+	depth: number;
 }
 
 const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 {
 	if (!step) return null;
 
-	const lines = inputText.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
-	if (lines.length < 1) return null;
-
-	const n = Number(lines[0]);
 	const vars = step.vars || {};
 	const highlight = new Set(step.highlight || []);
-	const idx = vars.idx as number | undefined;
-	const s = vars.s as string | undefined;
+	const nodes = vars.acNodes as ACNode[] | undefined;
 
-	// Build Trie structure from patterns
-	const patterns: string[] = [];
-	for (let i = 1; i <= n && i < lines.length; ++i)
+	if (!nodes || nodes.length === 0) return null;
+
+	const positions = useMemo(() =>
 	{
-		patterns.push(lines[i]);
-	}
+		const pos = new Map<number, { x: number; y: number }>();
 
-	// Use useMemo to stabilize Trie structure
-	const { trie, positions, svgHeight, nodeChar } = useMemo(() =>
-	{
-		// Simple Trie layout
-		const trieMap: Map<number, Map<string, number>> = new Map();
-		trieMap.set(0, new Map());
-		let nodeId = 0;
-
-		for (const pattern of patterns)
-		{
-			let current = 0;
-			for (const char of pattern)
-			{
-				if (!trieMap.has(current)) trieMap.set(current, new Map());
-				const currentMap = trieMap.get(current)!;
-				if (!currentMap.has(char))
-				{
-					nodeId++;
-					currentMap.set(char, nodeId);
-					trieMap.set(nodeId, new Map());
-				}
-				current = currentMap.get(char)!;
-			}
-		}
-
-		// Layout nodes by depth
-		const depth: Map<number, number> = new Map();
-		const queue: number[] = [0];
-		depth.set(0, 0);
-
-		while (queue.length > 0)
-		{
-			const u = queue.shift()!;
-			const d = depth.get(u)!;
-			const children = trieMap.get(u);
-			if (children)
-			{
-				for (const [_, v] of children)
-				{
-					depth.set(v, d + 1);
-					queue.push(v);
-				}
-			}
-		}
-
-		// Group by depth
+		// 按深度分层
 		const levels: number[][] = [];
-		for (const [node, d] of depth)
+		for (const node of nodes)
 		{
-			while (levels.length <= d) levels.push([]);
-			levels[d].push(node);
+			while (levels.length <= node.depth) levels.push([]);
+			levels[node.depth].push(node.id);
 		}
 
-		// Calculate positions
-		const pos: Map<number, { x: number; y: number }> = new Map();
 		const nodeRadius = 18;
 		const levelHeight = 70;
 		const nodeSpacing = 50;
@@ -99,93 +47,121 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 			const y = 40 + idx * levelHeight;
 			const totalWidth = (level.length - 1) * nodeSpacing;
 			const startX = 200 - totalWidth / 2;
-			level.forEach((node, i) =>
+			level.forEach((nodeId, i) =>
 			{
-				pos.set(node, { x: startX + i * nodeSpacing, y });
+				pos.set(nodeId, { x: startX + i * nodeSpacing, y });
 			});
 		});
 
-		const height = Math.max(300, levels.length * levelHeight + 80);
+		return pos;
+	}, [nodes.map(n => `${n.id}:${n.depth}`).join(',')]);
 
-		// Find character for each node
-		const charMap: Map<number, string> = new Map();
-		for (const [u, children] of trieMap)
-		{
-			for (const [char, v] of children)
-			{
-				charMap.set(v, char);
-			}
-		}
-
-		return { trie: trieMap, positions: pos, svgHeight: height, nodeChar: charMap };
-	}, [patterns.join(',')]);
+	const svgHeight = useMemo(() =>
+	{
+		const maxDepth = Math.max(...nodes.map(n => n.depth));
+		return Math.max(300, (maxDepth + 1) * 70 + 80);
+	}, [nodes]);
 
 	const nodeRadius = 18;
 
-	return (		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+	return (
+		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-				<span>🔗</span> AC 自动机 (Trie + Fail指针)
+				<span>🔗</span> AC 自动机 (Trie + Fail 指针)
+				<span className="text-xs text-gray-500 ml-auto">节点数: {nodes.length}</span>
 			</h3>
 			<div className="flex justify-center overflow-x-auto">
 				<svg viewBox={`0 0 400 ${svgHeight}`} className="w-full max-w-[500px] h-auto">
 					<defs>
-						<marker id="ac-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-							<polygon points="0 0, 8 3, 0 6" fill="#6b7280" />
+						<marker id="ac-child" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+							<polygon points="0 0, 7 2.5, 0 5" fill="#6b7280" />
 						</marker>
-						<marker id="ac-arrow-hl" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-							<polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
+						<marker id="ac-child-hl" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+							<polygon points="0 0, 7 2.5, 0 5" fill="#f59e0b" />
+						</marker>
+						<marker id="ac-fail" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+							<polygon points="0 0, 7 2.5, 0 5" fill="#ef4444" />
+						</marker>
+						<marker id="ac-fail-hl" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+							<polygon points="0 0, 7 2.5, 0 5" fill="#fbbf24" />
 						</marker>
 					</defs>
 
-					{/* Trie edges */}
-					{Array.from(trie.entries()).map(([u, children]) =>
+					{/* Trie 边 */}
+					{nodes.map(node =>
 					{
-						const uPos = positions.get(u);
-						if (!uPos) return null;
-
-						return Array.from(children.entries()).map(([char, v]) =>
+						const fromPos = positions.get(node.id);
+						if (!fromPos) return null;
+						return node.children.map((child, idx) =>
 						{
-							const vPos = positions.get(v);
-							if (!vPos) return null;
+							const toPos = positions.get(child.to);
+							if (!toPos) return null;
 
-							const isHL = highlight.has(String(u)) && highlight.has(String(v));
+							const isHL = highlight.has(String(node.id)) && highlight.has(String(child.to));
 
 							return (
-								<g key={`edge-${u}-${v}`}>
+								<g key={`child-${node.id}-${idx}`}>
 									<line
-										x1={uPos.x} y1={uPos.y + nodeRadius}
-										x2={vPos.x} y2={vPos.y - nodeRadius}
+										x1={fromPos.x} y1={fromPos.y + nodeRadius}
+										x2={toPos.x} y2={toPos.y - nodeRadius}
 										stroke={isHL ? '#f59e0b' : '#6b7280'}
 										strokeWidth={isHL ? 2.5 : 1.5}
-										markerEnd={isHL ? 'url(#ac-arrow-hl)' : 'url(#ac-arrow)'}
-										className="transition-all duration-300"
+										markerEnd={isHL ? 'url(#ac-child-hl)' : 'url(#ac-child)'}
 									/>
 									<text
-										x={(uPos.x + vPos.x) / 2 + 10}
-										y={(uPos.y + vPos.y) / 2}
-										fontSize="12" fontWeight="bold"
+										x={(fromPos.x + toPos.x) / 2 + 8}
+										y={(fromPos.y + toPos.y) / 2}
+										fontSize="11" fontWeight="bold"
 										fill={isHL ? '#fbbf24' : '#9ca3af'}
 									>
-										{char}
+										{child.char}
 									</text>
 								</g>
 							);
 						});
 					})}
 
-				{/* Nodes */}
-				{Array.from(positions.keys()).map(node =>
-				{
-					const pos = positions.get(node);
-					if (!pos) return null;
+					{/* Fail 指针 */}
+					{nodes.map(node =>
+					{
+						if (node.fail === 0 || node.id === 0) return null;
+						const fromPos = positions.get(node.id);
+						const toPos = positions.get(node.fail);
+						if (!fromPos || !toPos) return null;
 
-					const isHL = highlight.has(String(node));
-					const isRoot = node === 0;
-					const fill = isHL ? '#f59e0b' : isRoot ? '#22c55e' : '#6366f1';
-					const stroke = isHL ? '#d97706' : isRoot ? '#16a34a' : '#4f46e5';
-					const char = nodeChar.get(node);
+						const isHL = highlight.has(String(node.id)) && highlight.has(String(node.fail));
+
+						// 弯曲的 fail 指针
+						const midX = (fromPos.x + toPos.x) / 2;
+						const midY = (fromPos.y + toPos.y) / 2 - 15;
+
 						return (
-							<g key={`node-${node}`}>
+							<g key={`fail-${node.id}`}>
+								<path
+									d={`M ${fromPos.x} ${fromPos.y - nodeRadius} Q ${midX} ${midY} ${toPos.x} ${toPos.y - nodeRadius}`}
+									fill="none"
+									stroke={isHL ? '#fbbf24' : '#ef4444'}
+									strokeWidth={isHL ? 2 : 1}
+									strokeDasharray="3,3"
+									markerEnd={isHL ? 'url(#ac-fail-hl)' : 'url(#ac-fail)'}
+								/>
+							</g>
+						);
+					})}
+
+					{/* 节点 */}
+					{nodes.map(node =>
+					{
+						const pos = positions.get(node.id);
+						if (!pos) return null;
+
+						const isHL = highlight.has(String(node.id));
+						const isRoot = node.id === 0;
+						const fill = isHL ? '#f59e0b' : isRoot ? '#22c55e' : '#6366f1';
+						const stroke = isHL ? '#d97706' : isRoot ? '#16a34a' : '#4f46e5';
+
+						return (
+							<g key={`node-${node.id}`}>
 								{isHL && (
 									<circle
 										cx={pos.x} cy={pos.y} r={nodeRadius + 4}
@@ -195,20 +171,19 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 								<circle
 									cx={pos.x} cy={pos.y} r={nodeRadius}
 									fill={fill} stroke={stroke} strokeWidth={2}
-									className="transition-all duration-300"
 								/>
 								<text
-									x={pos.x} y={pos.y - 3}
+									x={pos.x} y={pos.y - 2}
 									textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff"
 								>
-									{node}
+									{node.id}
 								</text>
-								{char && (
+								{node.cnt > 0 && (
 									<text
 										x={pos.x} y={pos.y + 10}
-										textAnchor="middle" fontSize="11" fontWeight="bold" fill="#d1d5db"
+										textAnchor="middle" fontSize="8" fill="#d1d5db"
 									>
-										{char}
+										cnt:{node.cnt}
 									</text>
 								)}
 							</g>
@@ -216,16 +191,20 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 					})}
 				</svg>
 			</div>
-			<div className="mt-2 text-[10px] text-gray-500 text-center">
-				<span className="inline-block w-3 h-3 rounded-full bg-emerald-500 mr-1"></span>根节点
-				<span className="inline-block w-3 h-3 rounded-full bg-amber-500 ml-3 mr-1"></span>当前节点
-				<span className="inline-block w-3 h-0.5 bg-gray-500 ml-3 mr-1"></span>Trie边
+			<div className="mt-2 text-[10px] text-gray-500 text-center flex flex-wrap justify-center gap-3">
+				<span className="flex items-center gap-1">
+					<span className="w-4 h-0.5 bg-gray-500 inline-block"></span> Trie 边
+				</span>
+				<span className="flex items-center gap-1">
+					<span className="w-4 h-0.5 bg-red-500 inline-block" style={{ borderTop: '1px dashed' }}></span> Fail 指针
+				</span>
+				<span className="flex items-center gap-1">
+					<span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 根节点
+				</span>
+				<span className="flex items-center gap-1">
+					<span className="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> 当前操作
+				</span>
 			</div>
-			{s && (
-				<div className="mt-2 text-xs text-gray-400 text-center">
-					匹配文本: <span className="text-cyan-400 font-mono">"{s}"</span>
-				</div>
-			)}
 		</div>
 	);
 };
