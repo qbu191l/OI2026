@@ -121,7 +121,7 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 						});
 					})}
 
-					{/* Fail 指针 */}
+					{/* Fail 指针 (曲线虚线) */}
 					{nodes.map(node =>
 					{
 						if (node.fail === 0 || node.id === 0) return null;
@@ -131,18 +131,23 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 
 						const isHL = highlight.has(String(node.id)) && highlight.has(String(node.fail));
 
-						// 弯曲的 fail 指针
+						// 计算控制点，创建曲线（与 SAM/GSAM 一致）
 						const midX = (fromPos.x + toPos.x) / 2;
-						const midY = (fromPos.y + toPos.y) / 2 - 15;
+						const midY = (fromPos.y + toPos.y) / 2;
+						const dx = toPos.x - fromPos.x;
+						const dy = toPos.y - fromPos.y;
+						// 控制点偏移，使曲线向左弯曲
+						const controlX = midX - dy * 0.3;
+						const controlY = midY + dx * 0.3;
 
 						return (
 							<g key={`fail-${node.id}`}>
 								<path
-									d={`M ${fromPos.x} ${fromPos.y - nodeRadius} Q ${midX} ${midY} ${toPos.x} ${toPos.y - nodeRadius}`}
+									d={`M ${fromPos.x} ${fromPos.y - nodeRadius} Q ${controlX} ${controlY} ${toPos.x} ${toPos.y - nodeRadius}`}
 									fill="none"
 									stroke={isHL ? '#fbbf24' : '#ef4444'}
 									strokeWidth={isHL ? 2 : 1}
-									strokeDasharray="3,3"
+									strokeDasharray="4,3"
 									markerEnd={isHL ? 'url(#ac-fail-hl)' : 'url(#ac-fail)'}
 								/>
 							</g>
@@ -196,7 +201,10 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 					<span className="w-4 h-0.5 bg-gray-500 inline-block"></span> Trie 边
 				</span>
 				<span className="flex items-center gap-1">
-					<span className="w-4 h-0.5 bg-red-500 inline-block" style={{ borderTop: '1px dashed' }}></span> Fail 指针
+					<svg width="20" height="10" className="inline-block">
+						<path d="M 2 8 Q 10 2 18 8" stroke="#ef4444" strokeWidth="1" strokeDasharray="2,2" fill="none" />
+					</svg>
+					Fail 指针
 				</span>
 				<span className="flex items-center gap-1">
 					<span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 根节点
