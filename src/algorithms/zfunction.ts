@@ -129,34 +129,50 @@ export const zFunctionAlgo: AlgoDef =
 
 		for (let i = 2; i <= tl; ++i)
 		{
+			steps.push({
+				desc: `开始计算 z[${i}]，当前匹配区间 [${l}, ${r}]`,
+				line: 10,
+				vars: { i, l, r, t: t.slice(1), z: [...z] },
+				highlight: [String(i)],
+			});
+
 			if (i <= r)
 			{
 				z[i] = Math.min(z[i - l + 1], r - i + 1);
 				steps.push({
-					desc: `i=${i}，i≤r，z[${i}]=min(z[${i - l + 1}]=${z[i - l + 1]}, ${r - i + 1})=${z[i]}`,
+					desc: `i≤r，利用对称性：z[${i}]=min(z[${i - l + 1}]=${z[i - l + 1]}, ${r - i + 1})=${z[i]}`,
 					line: 11,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
+					highlight: [String(i), String(i - l + 1)],
 				});
 			}
 			else
 			{
 				z[i] = 0;
 				steps.push({
-					desc: `i=${i}，i>r，z[${i}]=0`,
+					desc: `i>r，超出当前匹配区间，z[${i}]=0`,
 					line: 15,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
+					highlight: [String(i)],
 				});
 			}
 
 			while (i + z[i] <= tl && t[i + z[i]] === t[1 + z[i]])
 			{
+				steps.push({
+					desc: `扩展：t[${i + z[i]}]='${t[i + z[i]]}' = t[${1 + z[i]}]='${t[1 + z[i]]}'，z[${i}]++`,
+					line: 17,
+					vars: { i, z: [...z], t: t.slice(1) },
+					highlight: [String(i + z[i]), String(1 + z[i])],
+				});
 				++z[i];
 			}
 
 			steps.push({
-				desc: `扩展：z[${i}]=${z[i]}`,
+				desc: `扩展结束：z[${i}]=${z[i]}`,
 				line: 18,
 				vars: { i, t: t.slice(1), z: [...z] },
+				highlight: [String(i)],
 			});
 
 			if (i + z[i] - 1 > r)
@@ -164,7 +180,7 @@ export const zFunctionAlgo: AlgoDef =
 				l = i;
 				r = i + z[i] - 1;
 				steps.push({
-					desc: `更新边界：l=${l}, r=${r}`,
+					desc: `更新匹配区间：l=${l}, r=${r}`,
 					line: 21,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
 				});

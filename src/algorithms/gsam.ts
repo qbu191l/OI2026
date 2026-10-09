@@ -152,14 +152,37 @@ export const gsamAlgo: AlgoDef =
 		for (const str of strings)
 		{
 			let p = 0;
+			steps.push({
+				desc: `开始插入字符串 "${str}" 到 Trie`,
+				line: 72,
+				vars: { str, trie_tot, tots, len: [...len], fa: [...fa] },
+				highlight: [String(p)],
+			});
+			
 			for (let j = 0; j < str.length; ++j)
 			{
 				const c = str.charCodeAt(j) - 'a'.charCodeAt(0);
+				const char = str[j];
 				if (!trie[p].has(c))
 				{
 					++trie_tot;
 					trie.push(new Map());
 					trie[p].set(c, trie_tot);
+					steps.push({
+						desc: `字符 '${char}'：节点 ${p} 没有该转移，创建新节点 ${trie_tot}`,
+						line: 73,
+						vars: { str, j, char, p, trie_tot, tots, len: [...len], fa: [...fa] },
+						highlight: [String(p), String(trie_tot)],
+					});
+				}
+				else
+				{
+					steps.push({
+						desc: `字符 '${char}'：节点 ${p} 已有转移，移动到节点 ${trie[p].get(c)!}`,
+						line: 74,
+						vars: { str, j, char, p, nextNode: trie[p].get(c)!, trie_tot, tots, len: [...len], fa: [...fa] },
+						highlight: [String(p), String(trie[p].get(c)!)],
+					});
 				}
 				p = trie[p].get(c)!;
 			}
@@ -222,14 +245,43 @@ export const gsamAlgo: AlgoDef =
 		queue.push(0);
 		samid[0] = 1;
 
+		steps.push({
+			desc: `开始 BFS 构建 GSAM，初始队列包含 Trie 根节点`,
+			line: 78,
+			vars: { queue: [...queue], gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
+		});
+
 		while (queue.length > 0)
 		{
 			const u = queue.shift()!;
+			steps.push({
+				desc: `出队 Trie 节点 ${u}，对应 GSAM 节点 ${samid[u]}`,
+				line: 79,
+				vars: { u, samid_u: samid[u], queue: [...queue], gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
+				highlight: [String(u), String(samid[u])],
+			});
+			
 			if (trie[u])
 			{
 				for (const [c, v] of trie[u].entries())
 				{
+					const char = String.fromCharCode('a'.charCodeAt(0) + c);
+					steps.push({
+						desc: `处理转移 '${char}'：Trie 节点 ${u} → ${v}，调用 gsam_extend(${samid[u]}, ${c})`,
+						line: 80,
+						vars: { u, v, c, char, samid_u: samid[u], gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
+						highlight: [String(u), String(v)],
+					});
+					
 					samid[v] = gsam_extend(samid[u], c);
+					
+					steps.push({
+						desc: `gsam_extend 返回 ${samid[v]}，设置 samid[${v}]=${samid[v]}`,
+						line: 81,
+						vars: { v, samid_v: samid[v], gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
+						highlight: [String(v), String(samid[v])],
+					});
+					
 					queue.push(v);
 				}
 			}
@@ -237,7 +289,7 @@ export const gsamAlgo: AlgoDef =
 
 		steps.push({
 			desc: `GSAM 构建完成，共 ${gsam_tot} 个节点`,
-			line: 80,
+			line: 85,
 			vars: { gsam_tot, len: len.slice(0, gsam_tot + 1), fa: fa.slice(0, gsam_tot + 1) },
 		});
 

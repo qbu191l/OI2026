@@ -131,11 +131,18 @@ export const samAlgo: AlgoDef =
 				desc: `extend('${s[i]}')：新建节点 ${np}，len[${np}]=${len[np]}`,
 				line: 32,
 				vars: { i, c: s[i], np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+				highlight: [String(np)],
 			});
 
 			let cur = p;
 			while (cur && !ch[cur].has(c))
 			{
+				steps.push({
+					desc: `从节点 ${cur} 添加转移 '${s[i]}' → ${np}`,
+					line: 36,
+					vars: { cur, np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					highlight: [String(cur), String(np)],
+				});
 				ch[cur].set(c, np);
 				cur = fa[cur];
 			}
@@ -145,20 +152,29 @@ export const samAlgo: AlgoDef =
 				fa[np] = 1;
 				steps.push({
 					desc: `fa[${np}]=1（无匹配前缀）`,
-					line: 38,
+					line: 40,
 					vars: { np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					highlight: [String(np), '1'],
 				});
 			}
 			else
 			{
 				const q = ch[cur].get(c)!;
+				steps.push({
+					desc: `找到节点 ${cur} 已有转移 '${s[i]}' → ${q}`,
+					line: 44,
+					vars: { cur, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+					highlight: [String(cur), String(q)],
+				});
+
 				if (len[q] === len[cur] + 1)
 				{
 					fa[np] = q;
 					steps.push({
-						desc: `fa[${np}]=${q}（len[q]=len[${cur}]+1）`,
-						line: 43,
+						desc: `len[${q}]=${len[q]}=len[${cur}]+1，fa[${np}]=${q}`,
+						line: 47,
 						vars: { np, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						highlight: [String(np), String(q)],
 					});
 				}
 				else
@@ -171,13 +187,27 @@ export const samAlgo: AlgoDef =
 					ch[nq] = new Map(ch[q]);
 
 					steps.push({
-						desc: `克隆节点 ${nq}，len[${nq}]=${len[nq]}，复制 ${q} 的转移`,
-						line: 47,
-						vars: { nq, q, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						desc: `len[${q}]=${len[q]}≠len[${cur}]+1，克隆节点 ${nq}`,
+						line: 51,
+						vars: { nq, q, cur, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						highlight: [String(nq), String(q)],
+					});
+
+					steps.push({
+						desc: `设置：len[${nq}]=${len[nq]}, fa[${nq}]=${fa[nq]}, fa[${q}]=${nq}, fa[${np}]=${nq}`,
+						line: 54,
+						vars: { nq, q, np, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+						highlight: [String(nq), String(q), String(np)],
 					});
 
 					while (cur && ch[cur].get(c) === q)
 					{
+						steps.push({
+							desc: `更新节点 ${cur} 的转移：'${s[i]}' → ${nq}`,
+							line: 58,
+							vars: { cur, nq, tot, len: len.slice(0, tot + 1), fa: fa.slice(0, tot + 1) },
+							highlight: [String(cur), String(nq)],
+						});
 						ch[cur].set(c, nq);
 						cur = fa[cur];
 					}

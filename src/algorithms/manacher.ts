@@ -108,34 +108,50 @@ export const manacherAlgo: AlgoDef =
 
 		for (let i = 2; i < sStr.length; ++i)
 		{
+			steps.push({
+				desc: `开始计算 d[${i}]，当前回文边界 [${l}, ${r}]`,
+				line: 20,
+				vars: { i, l, r, d: [...d], s: sStr },
+				highlight: [String(i)],
+			});
+
 			if (i <= r)
 			{
 				d[i] = Math.min(d[r - i + l], r - i + 1);
 				steps.push({
-					desc: `i=${i}，i≤r，d[${i}]=min(d[${r - i + l}]=${d[r - i + l]}, ${r - i + 1})=${d[i]}`,
+					desc: `i≤r，利用对称性：d[${i}]=min(d[${r - i + l}]=${d[r - i + l]}, ${r - i + 1})=${d[i]}`,
 					line: 22,
 					vars: { i, l, r, d: [...d], s: sStr },
+					highlight: [String(i), String(r - i + l)],
 				});
 			}
 			else
 			{
 				d[i] = 1;
 				steps.push({
-					desc: `i=${i}，i>r，d[${i}]=1`,
+					desc: `i>r，超出当前回文边界，d[${i}]=1`,
 					line: 26,
 					vars: { i, l, r, d: [...d], s: sStr },
+					highlight: [String(i)],
 				});
 			}
 
 			while (i - d[i] >= 0 && i + d[i] < sStr.length && sStr[i - d[i]] === sStr[i + d[i]])
 			{
+				steps.push({
+					desc: `扩展：s[${i - d[i]}]='${sStr[i - d[i]]}' = s[${i + d[i]}]='${sStr[i + d[i]]}'，d[${i}]++`,
+					line: 28,
+					vars: { i, d: [...d], s: sStr },
+					highlight: [String(i - d[i]), String(i + d[i])],
+				});
 				++d[i];
 			}
 
 			steps.push({
-				desc: `扩展：d[${i}]=${d[i]}`,
+				desc: `扩展结束：d[${i}]=${d[i]}`,
 				line: 29,
 				vars: { i, d: [...d], s: sStr },
+				highlight: [String(i)],
 			});
 
 			if (i + d[i] - 1 > r)
@@ -143,7 +159,7 @@ export const manacherAlgo: AlgoDef =
 				l = i - (d[i] - 1);
 				r = i + (d[i] - 1);
 				steps.push({
-					desc: `更新边界：l=${l}, r=${r}`,
+					desc: `更新回文边界：l=${l}, r=${r}`,
 					line: 32,
 					vars: { i, l, r, d: [...d], s: sStr },
 				});

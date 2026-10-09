@@ -140,12 +140,20 @@ export const kmpAlgo: AlgoDef =
 
 		for (let i = 1; i <= m; ++i)
 		{
+			steps.push({
+				desc: `开始比较 s1[${i}]='${s1[i]}' 与 s2[${j + 1}]`,
+				line: 22,
+				vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
+				highlight: [String(i)],
+			});
+
 			while (j > 0 && s1[i] !== s2[j + 1])
 			{
 				steps.push({
-					desc: `i=${i}, s1[${i}]='${s1[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}', j=pi[${j}]=${pi[j]}`,
+					desc: `不匹配！s1[${i}]='${s1[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}'，j 回退到 pi[${j}]=${pi[j]}`,
 					line: 23,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
+					highlight: [String(i), String(j + 1)],
 				});
 				j = pi[j];
 			}
@@ -153,9 +161,10 @@ export const kmpAlgo: AlgoDef =
 			{
 				++j;
 				steps.push({
-					desc: `i=${i}, s1[${i}]='${s1[i]}' = s2[${j}]='${s2[j]}', ++j=${j}`,
+					desc: `匹配成功！s1[${i}]='${s1[i]}' = s2[${j}]='${s2[j]}'，j 前进到 ${j}`,
 					line: 26,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
+					highlight: [String(i), String(j)],
 				});
 			}
 			if (j === n)
@@ -163,9 +172,15 @@ export const kmpAlgo: AlgoDef =
 				const pos = i - n + 1;
 				matches.push(pos);
 				steps.push({
-					desc: `找到匹配！位置 ${pos}`,
+					desc: `找到完整匹配！模式串在位置 ${pos} 出现`,
 					line: 28,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pos, pi: [...pi], matches: [...matches] },
+					highlight: [String(i), String(j)],
+				});
+				steps.push({
+					desc: `j 回退到 pi[${j}]=${pi[j]}，继续寻找下一个匹配`,
+					line: 30,
+					vars: { i, j: pi[j], s1: s1.slice(1), s2: s2.slice(1), pi: [...pi], matches: [...matches] },
 				});
 				j = pi[j];
 			}

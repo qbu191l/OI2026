@@ -143,6 +143,14 @@ export const trieAlgo: AlgoDef =
 			{
 				const s = lines[lineIdx];
 				let now = 0;
+				
+				steps.push({
+					desc: `开始插入字符串 "${s}"，从根节点 0 出发`,
+					line: 33,
+					vars: { s, idx, cnt: [...cnt], currentNode: now },
+					highlight: [String(now)],
+				});
+				
 				for (let j = 0; j < s.length; ++j)
 				{
 					const c = s[j];
@@ -155,14 +163,31 @@ export const trieAlgo: AlgoDef =
 					if (!ch[now][k])
 					{
 						ch[now][k] = ++idx;
+						steps.push({
+							desc: `字符 '${c}'：节点 ${now} 没有该转移，创建新节点 ${idx}`,
+							line: 35,
+							vars: { s, j, c, now, idx, cnt: [...cnt] },
+							highlight: [String(now), String(idx)],
+						});
+					}
+					else
+					{
+						steps.push({
+							desc: `字符 '${c}'：节点 ${now} 已有转移，移动到节点 ${ch[now][k]}`,
+							line: 37,
+							vars: { s, j, c, now, nextNode: ch[now][k], idx, cnt: [...cnt] },
+							highlight: [String(now), String(ch[now][k])],
+						});
 					}
 					now = ch[now][k];
 					++cnt[now];
 				}
+				
 				steps.push({
-					desc: `插入字符串 "${s}"`,
-					line: 33,
-					vars: { s, idx, cnt: [...cnt] },
+					desc: `字符串 "${s}" 插入完成，最终节点 ${now} 的计数 = ${cnt[now]}`,
+					line: 39,
+					vars: { s, idx, cnt: [...cnt], finalNode: now },
+					highlight: [String(now)],
 				});
 			}
 

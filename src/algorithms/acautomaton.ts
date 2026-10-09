@@ -161,31 +161,40 @@ export const acAutomatonAlgo: AlgoDef =
 		}
 
 		steps.push({
-			desc: `开始 BFS 构建失配指针`,
+			desc: `开始 BFS 构建失配指针，初始队列包含根节点的所有子节点`,
 			line: 25,
-			vars: { queue: [...queue] },
+			vars: { idx, queue: [...queue], nxt: [...nxt] },
 		});
 
 		while (queue.length > 0)
 		{
 			const u = queue.shift()!;
-			for (let i = 0; i < 28; ++i)
+			steps.push({
+				desc: `出队节点 ${u}，处理其所有转移`,
+				line: 27,
+				vars: { u, queue: [...queue], nxt: [...nxt] },
+				highlight: [String(u)],
+			});
+
+			for (let i = 0; i < 26; ++i)
 			{
 				const v = trie[u][i];
 				if (v)
 				{
 					nxt[v] = trie[nxt[u]][i];
+					steps.push({
+						desc: `节点 ${u} 有转移 '${String.fromCharCode('a'.charCodeAt(0) + i)}' → ${v}，设置 fail[${v}]=${nxt[v]}`,
+						line: 30,
+						vars: { u, v, i, char: String.fromCharCode('a'.charCodeAt(0) + i), queue: [...queue], nxt: [...nxt] },
+						highlight: [String(u), String(v), String(nxt[v])],
+					});
 					queue.push(v);
-				}
-				else
-				{
-					trie[u][i] = trie[nxt[u]][i];
 				}
 			}
 		}
 
 		steps.push({
-			desc: `AC 自动机构建完成`,
+			desc: `AC 自动机构建完成，所有 fail 指针已设置`,
 			line: 38,
 			vars: { idx, nxt: [...nxt] },
 		});
