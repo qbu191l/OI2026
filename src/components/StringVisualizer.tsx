@@ -273,12 +273,11 @@ const StringVisualizer: React.FC<StringVisualizerProps> = ({ step, inputText, al
 					{ name: 'i', pos: i || 0, color: 'text-amber-400' }
 				])}
 
-				{l !== undefined && r !== undefined && (
-					<div className="text-xs text-gray-400 mt-2">
-						当前回文中心: i={i}, 边界: [{l}, {r}]
-					</div>
-				)}
-
+			{l !== undefined && r !== undefined && l > 0 && r > 0 && (
+				<div className="text-xs text-gray-400 mt-2">
+					当前回文中心: i={i}, 边界: [{l}, {r}]
+				</div>
+			)}
 				{d && (
 					<div className="mt-3">
 						<div className="text-xs text-gray-400 mb-2">d 数组 (回文半径):</div>

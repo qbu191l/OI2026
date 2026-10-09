@@ -101,7 +101,7 @@ export const kmpAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}, s2[${i}]='${s2[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}', j=pi[${j}]=${pi[j]}`,
 					line: 10,
-					vars: { i, j, pi: [...pi] },
+					vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 				});
 				j = pi[j];
 			}
@@ -111,14 +111,14 @@ export const kmpAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}, s2[${i}]='${s2[i]}' = s2[${j}]='${s2[j]}', ++j=${j}`,
 					line: 13,
-					vars: { i, j, pi: [...pi] },
+					vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 				});
 			}
 			pi[i] = j;
 			steps.push({
 				desc: `pi[${i}] = ${j}`,
 				line: 15,
-				vars: { i, j, pi: [...pi] },
+				vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 			});
 		}
 
