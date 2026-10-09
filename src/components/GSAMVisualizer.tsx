@@ -155,7 +155,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 						});
 					})}
 
-					{/* 后缀链接 */}
+					{/* 后缀链接 (曲线虚线) */}
 					{nodes.map(node =>
 					{
 						if (node.fa === 0 || node.id === 1) return null;
@@ -165,11 +165,20 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 
 						const isHL = highlight.has(String(node.id)) && highlight.has(String(node.fa));
 
+						// 计算控制点，创建曲线
+						const midX = (fromPos.x + toPos.x) / 2;
+						const midY = (fromPos.y + toPos.y) / 2;
+						const dx = toPos.x - fromPos.x;
+						const dy = toPos.y - fromPos.y;
+						// 控制点偏移，使曲线向左弯曲
+						const controlX = midX - dy * 0.3;
+						const controlY = midY + dx * 0.3;
+
 						return (
-							<line
+							<path
 								key={`link-${node.id}`}
-								x1={fromPos.x} y1={fromPos.y + nodeRadius}
-								x2={toPos.x} y2={toPos.y - nodeRadius}
+								d={`M ${fromPos.x} ${fromPos.y + nodeRadius} Q ${controlX} ${controlY} ${toPos.x} ${toPos.y - nodeRadius}`}
+								fill="none"
 								stroke={isHL ? '#f59e0b' : '#6b7280'}
 								strokeWidth={isHL ? 2 : 1}
 								strokeDasharray="4,3"
@@ -223,7 +232,10 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 					<span className="w-4 h-0.5 bg-purple-500 inline-block"></span> 转移边
 				</span>
 				<span className="flex items-center gap-1">
-					<span className="w-4 h-0.5 bg-gray-500 inline-block" style={{ borderTop: '1px dashed' }}></span> 后缀链接
+					<svg width="20" height="10" className="inline-block">
+						<path d="M 2 8 Q 10 2 18 8" stroke="#6b7280" strokeWidth="1" strokeDasharray="2,2" fill="none" />
+					</svg>
+					后缀链接
 				</span>
 				<span className="flex items-center gap-1">
 					<span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 根节点
