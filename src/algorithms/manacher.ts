@@ -99,14 +99,33 @@ export const manacherAlgo: AlgoDef =
 		let l = 1, r = 1;
 
 		steps.push({
-			desc: `初始化：l=${l}, r=${r}, d[1]=${d[1]}`,
+			desc: `初始化：l=${l}, r=${r}, d[1]=${d[1]}（哨兵位置）`,
 			line: 18,
 			vars: { l, r, d: [...d], s: sStr },
 		});
 
 		let res = 0;
 
-		for (let i = 2; i < sStr.length; ++i)
+		// 先处理 i=2，更新 l 和 r 到实际字符位置
+		d[2] = 1;
+		while (2 - d[2] >= 0 && 2 + d[2] < sStr.length && sStr[2 - d[2]] === sStr[2 + d[2]])
+		{
+			++d[2];
+		}
+		if (2 + d[2] - 1 > r)
+		{
+			l = 2 - (d[2] - 1);
+			r = 2 + (d[2] - 1);
+		}
+		res = Math.max(res, d[2]);
+
+		steps.push({
+			desc: `处理 i=2：d[2]=${d[2]}，更新边界 l=${l}, r=${r}`,
+			line: 29,
+			vars: { i: 2, l, r, d: [...d], s: sStr },
+		});
+
+		for (let i = 3; i < sStr.length; ++i)
 		{
 			if (i <= r)
 			{

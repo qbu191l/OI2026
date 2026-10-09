@@ -145,7 +145,7 @@ export const kmpAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}, s1[${i}]='${s1[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}', j=pi[${j}]=${pi[j]}`,
 					line: 23,
-					vars: { i, j, pi: [...pi] },
+					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
 				});
 				j = pi[j];
 			}
@@ -155,7 +155,7 @@ export const kmpAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}, s1[${i}]='${s1[i]}' = s2[${j}]='${s2[j]}', ++j=${j}`,
 					line: 26,
-					vars: { i, j, pi: [...pi] },
+					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
 				});
 			}
 			if (j === n)
@@ -165,7 +165,7 @@ export const kmpAlgo: AlgoDef =
 				steps.push({
 					desc: `找到匹配！位置 ${pos}`,
 					line: 28,
-					vars: { i, j, pos, pi: [...pi], matches: [...matches] },
+					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pos, pi: [...pi], matches: [...matches] },
 				});
 				j = pi[j];
 			}

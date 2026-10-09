@@ -135,7 +135,7 @@ export const zFunctionAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}，i≤r，z[${i}]=min(z[${i - l + 1}]=${z[i - l + 1]}, ${r - i + 1})=${z[i]}`,
 					line: 11,
-					vars: { i, l, r, z: [...z] },
+					vars: { i, l, r, t: t.slice(1), z: [...z] },
 				});
 			}
 			else
@@ -144,7 +144,7 @@ export const zFunctionAlgo: AlgoDef =
 				steps.push({
 					desc: `i=${i}，i>r，z[${i}]=0`,
 					line: 15,
-					vars: { i, l, r, z: [...z] },
+					vars: { i, l, r, t: t.slice(1), z: [...z] },
 				});
 			}
 
@@ -156,7 +156,7 @@ export const zFunctionAlgo: AlgoDef =
 			steps.push({
 				desc: `扩展：z[${i}]=${z[i]}`,
 				line: 18,
-				vars: { i, z: [...z] },
+				vars: { i, t: t.slice(1), z: [...z] },
 			});
 
 			if (i + z[i] - 1 > r)
@@ -166,7 +166,7 @@ export const zFunctionAlgo: AlgoDef =
 				steps.push({
 					desc: `更新边界：l=${l}, r=${r}`,
 					line: 21,
-					vars: { i, l, r, z: [...z] },
+					vars: { i, l, r, t: t.slice(1), z: [...z] },
 				});
 			}
 		}

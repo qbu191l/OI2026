@@ -59,9 +59,9 @@ signed main()
 }`;
 
 const DEFAULT_INPUT = `3
-1 2 -1 3
-2 -1 3 7
-3 1 2 12`;
+1 1 1 6
+2 1 -1 1
+1 -1 2 5`;
 
 export const gaussAlgo: AlgoDef =
 {
