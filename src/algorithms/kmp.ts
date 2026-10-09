@@ -96,27 +96,33 @@ export const kmpAlgo: AlgoDef =
 
 		for (let i = 2; i <= n; ++i)
 		{
+			steps.push({
+				desc: `【计算 pi[${i}]】开始计算位置 ${i} 的前缀函数，当前 j=${j}`,
+				line: 9,
+				vars: { i, j, s2: s2.slice(1), pi: [...pi] },
+			});
+
 			while (j > 0 && s2[i] !== s2[j + 1])
 			{
 				steps.push({
-					desc: `i=${i}, s2[${i}]='${s2[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}', j=pi[${j}]=${pi[j]}`,
+					desc: `【失配回退】s2[${i}]='${s2[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}'，利用已计算的 pi 值回退：j = pi[${j}] = ${pi[j]}`,
 					line: 10,
 					vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 				});
 				j = pi[j];
 			}
-			if (s2[i] === s2[j + 1])
+			if (s1[i] === s2[j + 1])
 			{
 				++j;
 				steps.push({
-					desc: `i=${i}, s2[${i}]='${s2[i]}' = s2[${j}]='${s2[j]}', ++j=${j}`,
+					desc: `【匹配成功】s2[${i}]='${s2[i]}' = s2[${j}]='${s2[j]}'，j 前进到 ${j}`,
 					line: 13,
 					vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 				});
 			}
 			pi[i] = j;
 			steps.push({
-				desc: `pi[${i}] = ${j}`,
+				desc: `【记录结果】pi[${i}] = ${j}，表示 s2[1..${i}] 的最长相等前后缀长度为 ${j}`,
 				line: 15,
 				vars: { i, j, s2: s2.slice(1), pi: [...pi] },
 			});
@@ -141,7 +147,7 @@ export const kmpAlgo: AlgoDef =
 		for (let i = 1; i <= m; ++i)
 		{
 			steps.push({
-				desc: `开始比较 s1[${i}]='${s1[i]}' 与 s2[${j + 1}]`,
+				desc: `【主串指针 i=${i}】开始比较 s1[${i}]='${s1[i]}' 与 s2[${j + 1}]，当前 j=${j}`,
 				line: 22,
 				vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
 				highlight: [String(i)],
@@ -150,7 +156,7 @@ export const kmpAlgo: AlgoDef =
 			while (j > 0 && s1[i] !== s2[j + 1])
 			{
 				steps.push({
-					desc: `不匹配！s1[${i}]='${s1[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}'，j 回退到 pi[${j}]=${pi[j]}`,
+					desc: `【失配回退】s1[${i}]='${s1[i]}' ≠ s2[${j + 1}]='${s2[j + 1]}'。利用 pi 数组回退：j = pi[${j}] = ${pi[j]}。这样做的目的是跳过已经匹配过的前缀，避免重复比较。`,
 					line: 23,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
 					highlight: [String(i), String(j + 1)],
@@ -161,7 +167,7 @@ export const kmpAlgo: AlgoDef =
 			{
 				++j;
 				steps.push({
-					desc: `匹配成功！s1[${i}]='${s1[i]}' = s2[${j}]='${s2[j]}'，j 前进到 ${j}`,
+					desc: `【匹配成功】s1[${i}]='${s1[i]}' = s2[${j}]='${s2[j]}'，模式串指针 j 前进到 ${j}`,
 					line: 26,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pi: [...pi] },
 					highlight: [String(i), String(j)],
@@ -172,13 +178,13 @@ export const kmpAlgo: AlgoDef =
 				const pos = i - n + 1;
 				matches.push(pos);
 				steps.push({
-					desc: `找到完整匹配！模式串在位置 ${pos} 出现`,
+					desc: `【找到匹配】j=${j}=n，模式串完全匹配！在主串的位置 ${pos} 处找到模式串`,
 					line: 28,
 					vars: { i, j, s1: s1.slice(1), s2: s2.slice(1), pos, pi: [...pi], matches: [...matches] },
 					highlight: [String(i), String(j)],
 				});
 				steps.push({
-					desc: `j 回退到 pi[${j}]=${pi[j]}，继续寻找下一个匹配`,
+					desc: `【继续搜索】j 回退到 pi[${j}]=${pi[j]}，这样可以找到重叠的匹配，继续寻找下一个匹配`,
 					line: 30,
 					vars: { i, j: pi[j], s1: s1.slice(1), s2: s2.slice(1), pi: [...pi], matches: [...matches] },
 				});

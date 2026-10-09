@@ -130,7 +130,7 @@ export const zFunctionAlgo: AlgoDef =
 		for (let i = 2; i <= tl; ++i)
 		{
 			steps.push({
-				desc: `开始计算 z[${i}]，当前匹配区间 [${l}, ${r}]`,
+				desc: `【计算 z[${i}]】开始计算位置 ${i} 的 Z 值，当前最右匹配区间 [${l}, ${r}]`,
 				line: 10,
 				vars: { i, l, r, t: t.slice(1), z: [...z] },
 				highlight: [String(i)],
@@ -140,7 +140,7 @@ export const zFunctionAlgo: AlgoDef =
 			{
 				z[i] = Math.min(z[i - l + 1], r - i + 1);
 				steps.push({
-					desc: `i≤r，利用对称性：z[${i}]=min(z[${i - l + 1}]=${z[i - l + 1]}, ${r - i + 1})=${z[i]}`,
+					desc: `【利用对称性】i=${i} ≤ r=${r}，位置 ${i} 在当前匹配区间内。对应位置 ${i - l + 1} 的 z 值为 ${z[i - l + 1]}，区间剩余长度 ${r - i + 1}，取最小值：z[${i}]=${z[i]}`,
 					line: 11,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
 					highlight: [String(i), String(i - l + 1)],
@@ -150,7 +150,7 @@ export const zFunctionAlgo: AlgoDef =
 			{
 				z[i] = 0;
 				steps.push({
-					desc: `i>r，超出当前匹配区间，z[${i}]=0`,
+					desc: `【超出区间】i=${i} > r=${r}，位置 ${i} 不在当前匹配区间内，需要从头计算：z[${i}]=0`,
 					line: 15,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
 					highlight: [String(i)],
@@ -160,7 +160,7 @@ export const zFunctionAlgo: AlgoDef =
 			while (i + z[i] <= tl && t[i + z[i]] === t[1 + z[i]])
 			{
 				steps.push({
-					desc: `扩展：t[${i + z[i]}]='${t[i + z[i]]}' = t[${1 + z[i]}]='${t[1 + z[i]]}'，z[${i}]++`,
+					desc: `【暴力扩展】比较 t[${i + z[i]}]='${t[i + z[i]]}' 与 t[${1 + z[i]}]='${t[1 + z[i]]}'，相等，z[${i}]++`,
 					line: 17,
 					vars: { i, z: [...z], t: t.slice(1) },
 					highlight: [String(i + z[i]), String(1 + z[i])],
@@ -169,7 +169,7 @@ export const zFunctionAlgo: AlgoDef =
 			}
 
 			steps.push({
-				desc: `扩展结束：z[${i}]=${z[i]}`,
+				desc: `【扩展结束】z[${i}]=${z[i]}，表示从位置 ${i} 开始与 t 的前缀最长匹配长度为 ${z[i]}`,
 				line: 18,
 				vars: { i, t: t.slice(1), z: [...z] },
 				highlight: [String(i)],
@@ -180,7 +180,7 @@ export const zFunctionAlgo: AlgoDef =
 				l = i;
 				r = i + z[i] - 1;
 				steps.push({
-					desc: `更新匹配区间：l=${l}, r=${r}`,
+					desc: `【更新区间】i+z[i]-1=${i + z[i] - 1} > r=${r}，更新最右匹配区间为 [${l}, ${r}]`,
 					line: 21,
 					vars: { i, l, r, t: t.slice(1), z: [...z] },
 				});

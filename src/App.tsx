@@ -290,11 +290,11 @@ function App()
 				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-					<div className="lg:col-span-6">
+					<div className="lg:col-span-5">
 						<CodeDisplay code={algo.code} currentLine={currentStep?.line || 0} />
 					</div>
 
-					<div className="lg:col-span-6 space-y-4">
+					<div className="lg:col-span-7 space-y-4">
 						{currentStep && (
 							<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 								<div className="flex items-center justify-between mb-2">

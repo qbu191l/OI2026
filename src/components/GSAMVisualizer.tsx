@@ -60,15 +60,15 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 			levels[node.len].push(node.id);
 		}
 
-		const nodeRadius = 22;
-		const levelHeight = 70;
-		const nodeSpacing = 55;
+		const nodeRadius = 28;
+		const levelHeight = 90;
+		const nodeSpacing = 70;
 
 		levels.forEach((level, idx) =>
 		{
-			const y = 40 + idx * levelHeight;
+			const y = 50 + idx * levelHeight;
 			const totalWidth = (level.length - 1) * nodeSpacing;
-			const startX = 200 - totalWidth / 2;
+			const startX = 250 - totalWidth / 2;
 			level.forEach((nodeId, i) =>
 			{
 				pos.set(nodeId, { x: startX + i * nodeSpacing, y });
@@ -84,7 +84,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 		return Math.max(300, (maxLen + 1) * 70 + 80);
 	}, [nodes]);
 
-	const nodeRadius = 22;
+	const nodeRadius = 28;
 
 	return (
 		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
@@ -98,7 +98,7 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 				))}
 			</div>
 			<div className="flex justify-center overflow-x-auto">
-				<svg viewBox={`0 0 400 ${svgHeight}`} className="w-full max-w-[500px] h-auto">
+				<svg viewBox={`0 0 500 ${svgHeight}`} className="w-full max-w-[700px] h-auto">
 					<defs>
 						<marker id="gsam-link" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
 							<polygon points="0 0, 7 2.5, 0 5" fill="#6b7280" />
@@ -202,8 +202,8 @@ const GSAMVisualizer: React.FC<GSAMVisualizerProps> = ({ step, inputText }) =>
 									fill={fill} stroke={stroke} strokeWidth={2}
 								/>
 								<text
-									x={pos.x} y={pos.y - 4}
-									textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff"
+									x={pos.x} y={pos.y - 5}
+									textAnchor="middle" fontSize="12" fontWeight="bold" fill="#fff"
 								>
 									{node.id}
 								</text>

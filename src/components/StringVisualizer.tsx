@@ -20,8 +20,8 @@ const StringVisualizer: React.FC<StringVisualizerProps> = ({ step, inputText, al
 	const l = vars.l as number | undefined;
 	const r = vars.r as number | undefined;
 
-	const cellSize = 32;
-	const gap = 2;
+	const cellSize = 40;
+	const gap = 4;
 
 	const renderString = (str: string | undefined, label: string, pointers: { name: string; pos: number; color: string }[]) =>
 	{

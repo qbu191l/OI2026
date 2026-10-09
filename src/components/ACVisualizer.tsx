@@ -38,15 +38,15 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 			levels[node.depth].push(node.id);
 		}
 
-		const nodeRadius = 18;
-		const levelHeight = 70;
-		const nodeSpacing = 50;
+		const nodeRadius = 24;
+		const levelHeight = 80;
+		const nodeSpacing = 60;
 
 		levels.forEach((level, idx) =>
 		{
-			const y = 40 + idx * levelHeight;
+			const y = 50 + idx * levelHeight;
 			const totalWidth = (level.length - 1) * nodeSpacing;
-			const startX = 200 - totalWidth / 2;
+			const startX = 250 - totalWidth / 2;
 			level.forEach((nodeId, i) =>
 			{
 				pos.set(nodeId, { x: startX + i * nodeSpacing, y });
@@ -62,7 +62,7 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 		return Math.max(300, (maxDepth + 1) * 70 + 80);
 	}, [nodes]);
 
-	const nodeRadius = 18;
+	const nodeRadius = 24;
 
 	return (
 		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
@@ -71,7 +71,7 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 				<span className="text-xs text-gray-500 ml-auto">节点数: {nodes.length}</span>
 			</h3>
 			<div className="flex justify-center overflow-x-auto">
-				<svg viewBox={`0 0 400 ${svgHeight}`} className="w-full max-w-[500px] h-auto">
+				<svg viewBox={`0 0 500 ${svgHeight}`} className="w-full max-w-[700px] h-auto">
 					<defs>
 						<marker id="ac-child" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
 							<polygon points="0 0, 7 2.5, 0 5" fill="#6b7280" />
@@ -173,15 +173,15 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 									fill={fill} stroke={stroke} strokeWidth={2}
 								/>
 								<text
-									x={pos.x} y={pos.y - 2}
-									textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff"
+									x={pos.x} y={pos.y - 3}
+									textAnchor="middle" fontSize="12" fontWeight="bold" fill="#fff"
 								>
 									{node.id}
 								</text>
 								{node.cnt > 0 && (
 									<text
-										x={pos.x} y={pos.y + 10}
-										textAnchor="middle" fontSize="8" fill="#d1d5db"
+										x={pos.x} y={pos.y + 11}
+										textAnchor="middle" fontSize="9" fill="#d1d5db"
 									>
 										cnt:{node.cnt}
 									</text>

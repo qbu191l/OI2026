@@ -109,7 +109,7 @@ export const manacherAlgo: AlgoDef =
 		for (let i = 2; i < sStr.length; ++i)
 		{
 			steps.push({
-				desc: `开始计算 d[${i}]，当前回文边界 [${l}, ${r}]`,
+				desc: `【计算 d[${i}]】开始计算位置 ${i} 的回文半径，当前最右回文边界 [${l}, ${r}]`,
 				line: 20,
 				vars: { i, l, r, d: [...d], s: sStr },
 				highlight: [String(i)],
@@ -119,7 +119,7 @@ export const manacherAlgo: AlgoDef =
 			{
 				d[i] = Math.min(d[r - i + l], r - i + 1);
 				steps.push({
-					desc: `i≤r，利用对称性：d[${i}]=min(d[${r - i + l}]=${d[r - i + l]}, ${r - i + 1})=${d[i]}`,
+					desc: `【利用对称性】i=${i} ≤ r=${r}，位置 ${i} 在当前回文内。对称位置 ${r - i + l} 的回文半径为 ${d[r - i + l]}，到右边界的距离 ${r - i + 1}，取最小值：d[${i}]=${d[i]}`,
 					line: 22,
 					vars: { i, l, r, d: [...d], s: sStr },
 					highlight: [String(i), String(r - i + l)],
@@ -129,7 +129,7 @@ export const manacherAlgo: AlgoDef =
 			{
 				d[i] = 1;
 				steps.push({
-					desc: `i>r，超出当前回文边界，d[${i}]=1`,
+					desc: `【超出边界】i=${i} > r=${r}，位置 ${i} 不在当前回文内，需要从头计算：d[${i}]=1`,
 					line: 26,
 					vars: { i, l, r, d: [...d], s: sStr },
 					highlight: [String(i)],
@@ -139,7 +139,7 @@ export const manacherAlgo: AlgoDef =
 			while (i - d[i] >= 0 && i + d[i] < sStr.length && sStr[i - d[i]] === sStr[i + d[i]])
 			{
 				steps.push({
-					desc: `扩展：s[${i - d[i]}]='${sStr[i - d[i]]}' = s[${i + d[i]}]='${sStr[i + d[i]]}'，d[${i}]++`,
+					desc: `【暴力扩展】比较 s[${i - d[i]}]='${sStr[i - d[i]]}' 与 s[${i + d[i]}]='${sStr[i + d[i]]}'，相等，d[${i}]++`,
 					line: 28,
 					vars: { i, d: [...d], s: sStr },
 					highlight: [String(i - d[i]), String(i + d[i])],
@@ -148,7 +148,7 @@ export const manacherAlgo: AlgoDef =
 			}
 
 			steps.push({
-				desc: `扩展结束：d[${i}]=${d[i]}`,
+				desc: `【扩展结束】d[${i}]=${d[i]}，表示以位置 ${i} 为中心的最长回文半径为 ${d[i]}，对应原串回文长度 ${d[i] - 1}`,
 				line: 29,
 				vars: { i, d: [...d], s: sStr },
 				highlight: [String(i)],
@@ -159,7 +159,7 @@ export const manacherAlgo: AlgoDef =
 				l = i - (d[i] - 1);
 				r = i + (d[i] - 1);
 				steps.push({
-					desc: `更新回文边界：l=${l}, r=${r}`,
+					desc: `【更新边界】i+d[i]-1=${i + d[i] - 1} > r=${r}，更新最右回文边界为 [${l}, ${r}]`,
 					line: 32,
 					vars: { i, l, r, d: [...d], s: sStr },
 				});
