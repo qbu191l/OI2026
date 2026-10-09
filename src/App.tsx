@@ -19,6 +19,7 @@ import PruferVisualizer from './components/PruferVisualizer';
 import TarjanSCCVisualizer from './components/TarjanSCCVisualizer';
 import LCAVisualizer from './components/LCAVisualizer';
 import SplayVisualizer from './components/SplayVisualizer';
+import MatrixVisualizer from './components/MatrixVisualizer';
 import StepLog from './components/StepLog';
 import CommentSection from './components/CommentSection';
 import { validateInput, validateSteps, DEFAULT_CONFIG } from './utils/validation';
@@ -354,6 +355,9 @@ function App()
 						)}
 						{currentStep && algo.id === 'splay' && (
 							<SplayVisualizer key={`sp-${stepIdx}`} step={currentStep} />
+						)}
+						{currentStep && algo.id === 'gauss' && (
+							<MatrixVisualizer key={`matrix-${stepIdx}`} step={currentStep} />
 						)}
 
 						<VariablePanel step={currentStep} />
