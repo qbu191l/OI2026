@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { SimStep } from '../types';
 
 interface ACVisualizerProps
@@ -35,87 +35,94 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 		patterns.push(lines[i]);
 	}
 
-	// Simple Trie layout
-	const trie: Map<number, Map<string, number>> = new Map();
-	trie.set(0, new Map());
-	let nodeId = 0;
-
-	for (const pattern of patterns)
+	// Use useMemo to stabilize Trie structure
+	const { trie, positions, svgHeight, nodeChar } = useMemo(() =>
 	{
-		let current = 0;
-		for (const char of pattern)
-		{
-			if (!trie.has(current)) trie.set(current, new Map());
-			const currentMap = trie.get(current)!;
-			if (!currentMap.has(char))
-			{
-				nodeId++;
-				currentMap.set(char, nodeId);
-				trie.set(nodeId, new Map());
-			}
-			current = currentMap.get(char)!;
-		}
-	}
+		// Simple Trie layout
+		const trieMap: Map<number, Map<string, number>> = new Map();
+		trieMap.set(0, new Map());
+		let nodeId = 0;
 
-	// Layout nodes by depth
-	const depth: Map<number, number> = new Map();
-	const queue: number[] = [0];
-	depth.set(0, 0);
-
-	while (queue.length > 0)
-	{
-		const u = queue.shift()!;
-		const d = depth.get(u)!;
-		const children = trie.get(u);
-		if (children)
+		for (const pattern of patterns)
 		{
-			for (const [_, v] of children)
+			let current = 0;
+			for (const char of pattern)
 			{
-				depth.set(v, d + 1);
-				queue.push(v);
+				if (!trieMap.has(current)) trieMap.set(current, new Map());
+				const currentMap = trieMap.get(current)!;
+				if (!currentMap.has(char))
+				{
+					nodeId++;
+					currentMap.set(char, nodeId);
+					trieMap.set(nodeId, new Map());
+				}
+				current = currentMap.get(char)!;
 			}
 		}
-	}
 
-	// Group by depth
-	const levels: number[][] = [];
-	for (const [node, d] of depth)
-	{
-		while (levels.length <= d) levels.push([]);
-		levels[d].push(node);
-	}
+		// Layout nodes by depth
+		const depth: Map<number, number> = new Map();
+		const queue: number[] = [0];
+		depth.set(0, 0);
 
-	// Calculate positions
-	const positions: Map<number, { x: number; y: number }> = new Map();
-	const nodeRadius = 18;
-	const levelHeight = 70;
-	const nodeSpacing = 50;
-
-	levels.forEach((level, idx) =>
-	{
-		const y = 40 + idx * levelHeight;
-		const totalWidth = (level.length - 1) * nodeSpacing;
-		const startX = 200 - totalWidth / 2;
-		level.forEach((node, i) =>
+		while (queue.length > 0)
 		{
-			positions.set(node, { x: startX + i * nodeSpacing, y });
+			const u = queue.shift()!;
+			const d = depth.get(u)!;
+			const children = trieMap.get(u);
+			if (children)
+			{
+				for (const [_, v] of children)
+				{
+					depth.set(v, d + 1);
+					queue.push(v);
+				}
+			}
+		}
+
+		// Group by depth
+		const levels: number[][] = [];
+		for (const [node, d] of depth)
+		{
+			while (levels.length <= d) levels.push([]);
+			levels[d].push(node);
+		}
+
+		// Calculate positions
+		const pos: Map<number, { x: number; y: number }> = new Map();
+		const nodeRadius = 18;
+		const levelHeight = 70;
+		const nodeSpacing = 50;
+
+		levels.forEach((level, idx) =>
+		{
+			const y = 40 + idx * levelHeight;
+			const totalWidth = (level.length - 1) * nodeSpacing;
+			const startX = 200 - totalWidth / 2;
+			level.forEach((node, i) =>
+			{
+				pos.set(node, { x: startX + i * nodeSpacing, y });
+			});
 		});
-	});
 
-	const svgHeight = Math.max(300, levels.length * levelHeight + 80);
+		const height = Math.max(300, levels.length * levelHeight + 80);
 
-	// Find character for each node
-	const nodeChar: Map<number, string> = new Map();
-	for (const [u, children] of trie)
-	{
-		for (const [char, v] of children)
+		// Find character for each node
+		const charMap: Map<number, string> = new Map();
+		for (const [u, children] of trieMap)
 		{
-			nodeChar.set(v, char);
+			for (const [char, v] of children)
+			{
+				charMap.set(v, char);
+			}
 		}
-	}
 
-	return (
-		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
+		return { trie: trieMap, positions: pos, svgHeight: height, nodeChar: charMap };
+	}, [patterns.join(',')]);
+
+	const nodeRadius = 18;
+
+	return (		<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
 			<h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
 				<span>🔗</span> AC 自动机 (Trie + Fail指针)
 			</h3>
@@ -166,18 +173,17 @@ const ACVisualizer: React.FC<ACVisualizerProps> = ({ step, inputText }) =>
 						});
 					})}
 
-					{/* Nodes */}
-					{Array.from(depth.keys()).map(node =>
-					{
-						const pos = positions.get(node);
-						if (!pos) return null;
+				{/* Nodes */}
+				{Array.from(positions.keys()).map(node =>
+				{
+					const pos = positions.get(node);
+					if (!pos) return null;
 
-						const isHL = highlight.has(String(node));
-						const isRoot = node === 0;
-						const fill = isHL ? '#f59e0b' : isRoot ? '#22c55e' : '#6366f1';
-						const stroke = isHL ? '#d97706' : isRoot ? '#16a34a' : '#4f46e5';
-						const char = nodeChar.get(node);
-
+					const isHL = highlight.has(String(node));
+					const isRoot = node === 0;
+					const fill = isHL ? '#f59e0b' : isRoot ? '#22c55e' : '#6366f1';
+					const stroke = isHL ? '#d97706' : isRoot ? '#16a34a' : '#4f46e5';
+					const char = nodeChar.get(node);
 						return (
 							<g key={`node-${node}`}>
 								{isHL && (

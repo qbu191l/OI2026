@@ -356,7 +356,7 @@ function App()
 						{currentStep && algo.id === 'splay' && (
 							<SplayVisualizer key={`sp-${stepIdx}`} step={currentStep} />
 						)}
-						{currentStep && algo.id === 'gauss' && (
+						{currentStep && (algo.id === 'gauss' || algo.id === 'matrix-inverse') && (
 							<MatrixVisualizer key={`matrix-${stepIdx}`} step={currentStep} />
 						)}
 

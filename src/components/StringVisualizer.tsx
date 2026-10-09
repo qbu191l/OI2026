@@ -101,8 +101,8 @@ const StringVisualizer: React.FC<StringVisualizerProps> = ({ step, inputText, al
 		const pi = vars.pi as number[] | undefined;
 		const matches = vars.matches as number[] | undefined;
 
-		const pointers1 = i !== undefined ? [{ name: 'i', pos: i, color: 'text-amber-400' }] : [];
-		const pointers2 = j !== undefined ? [{ name: 'j', pos: j, color: 'text-cyan-400' }] : [];
+		const pointers1 = i !== undefined && i >= 1 ? [{ name: 'i', pos: i, color: 'text-amber-400' }] : [];
+		const pointers2 = j !== undefined && j >= 1 ? [{ name: 'j', pos: j, color: 'text-cyan-400' }] : [];
 
 		return (
 			<div className="bg-gray-900 rounded-xl border border-gray-700 p-4">
